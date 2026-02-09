@@ -8,11 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.0.0" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ComputerStore.Domain\ComputerStore.Domain.csproj" />
+    <ProjectReference Include="..\ComputerStore.Shared\ComputerStore.Shared.csproj" />
   </ItemGroup>
 
 </Project>

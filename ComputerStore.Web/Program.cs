@@ -1,3 +1,5 @@
+using ComputerStore.Application.Abstractions;
+using ComputerStore.Application.Services;
 using ComputerStore.Domain.Interfaces;
 using ComputerStore.Infrastructure.Data;
 using ComputerStore.Infrastructure.Repositories;
@@ -7,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Добавляем DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -18,6 +21,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     )
 );
 
+// Настройка Identity
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
@@ -30,6 +34,10 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+// Регистрация AutoMapper
+builder.Services.AddAutoMapper(typeof(ComputerStore.Application.Mappings.MappingProfile));
+
+// Регистрация репозиториев и Unit of Work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -39,9 +47,19 @@ builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
+// Регистрация сервисов
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+
+// Добавляем MVC
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+// Настройка Session для корзины
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -50,8 +68,12 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// Настройка HttpContextAccessor для доступа к HttpContext в сервисах
+builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
+// Заполнение базы данных начальными данными
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -67,6 +89,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
