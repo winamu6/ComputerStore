@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ComputerStore.Domain.Interfaces.Repositories;
+using System;
 using System.Collections.Generic;
 using System.Text;
 

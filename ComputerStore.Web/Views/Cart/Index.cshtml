@@ -1,113 +1,205 @@
-﻿@model IEnumerable<ComputerStore.Shared.DTOs.ProductDto>
+﻿@model ComputerStore.Shared.DTOs.CartDto
 @{
-    ViewData["Title"] = "Каталог товаров";
-    var categories = ViewBag.Categories as IEnumerable<ComputerStore.Shared.DTOs.CategoryDto>;
-    var currentSort = ViewBag.CurrentSort as string ?? "name";
-    var categoryId = ViewBag.CategoryId as int?;
-    var searchTerm = ViewBag.SearchTerm as string;
+    ViewData["Title"] = "Корзина покупок";
 }
 
 <div class="container py-4">
-    <div class="row">
-        <!-- Sidebar with categories -->
-        <div class="col-lg-3">
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Категории</h5>
-                </div>
-                <div class="list-group list-group-flush">
-                    <a asp-controller="Products" asp-action="Index"
-                       class="list-group-item list-group-item-action @(categoryId == null ? "active" : "")">
-                        Все товары
-                    </a>
-                    @if (categories != null)
-                    {
-                        @foreach (var category in categories)
+    <h2>Корзина покупок</h2>
+
+    @if (Model.Items.Any())
+    {
+        <div class="row mt-4">
+            <div class="col-lg-8">
+                @foreach (var item in Model.Items)
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    @if (!string.IsNullOrEmpty(item.ProductImageUrl))
+                                    {
+                                        <img src="@item.ProductImageUrl" alt="@item.ProductName"
+                                             class="img-fluid" style="max-height: 100px; object-fit: contain;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 100px;">
+                                            <i class="bi bi-image text-muted"></i>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="col-md-4">
+                                    <h6>
+                                        <a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId"
+                                           class="text-decoration-none text-dark">
+                                            @item.ProductName
+                                        </a>
+                                    </h6>
+                                    @if (!item.IsAvailable)
+                                    {
+                                        <p class="text-danger small mb-0">Товар недоступен</p>
+                                    }
+                                    else if (!item.InStock)
+                                    {
+                                        <p class="text-warning small mb-0">Недостаточно на складе</p>
+                                    }
+                                </div>
+
+                                <div class="col-md-2">
+                                    @if (item.DiscountPrice.HasValue)
+                                    {
+                                        <div>
+                                            <strong class="text-danger">$@item.FinalPrice.ToString("N2")</strong>
+                                        </div>
+                                        <small class="text-decoration-line-through text-muted">$@item.Price.ToString("N2")</small>
+                                    }
+                                    else
+                                    {
+                                        <strong>$@item.Price.ToString("N2")</strong>
+                                    }
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="input-group input-group-sm">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                                onclick="updateQuantity(@item.Id, @(item.Quantity - 1))">
+                                            <i class="bi bi-dash"></i>
+                                        </button>
+                                        <input type="number" class="form-control text-center"
+                                               value="@item.Quantity" min="1" max="@item.StockQuantity"
+                                               id="qty-@item.Id" readonly />
+                                        <button class="btn btn-outline-secondary" type="button"
+                                                onclick="updateQuantity(@item.Id, @(item.Quantity + 1))">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 text-end">
+                                    <strong>$@item.Subtotal.ToString("N2")</strong>
+                                    <form asp-action="Remove" method="post" class="d-inline">
+                                        <input type="hidden" name="cartItemId" value="@item.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger mt-2">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <form asp-action="Clear" method="post" class="mt-3">
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="bi bi-trash"></i> Очистить корзину
+                    </button>
+                </form>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Итого</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Товары (@Model.TotalItems шт.):</span>
+                            <strong id="subtotal">$@Model.Subtotal.ToString("N2")</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Доставка:</span>
+                            <strong id="shipping">
+                                @if (Model.ShippingCost == 0)
+                                {
+                                    <span class="text-success">Бесплатно</span>
+                                }
+                                else
+                                {
+                                    <span>$@Model.ShippingCost.ToString("N2")</span>
+                                }
+                            </strong>
+                        </div>
+                        <hr />
+                        <div class="d-flex justify-content-between mb-3">
+                            <h5>Всего:</h5>
+                            <h5 class="text-primary" id="total">$@Model.TotalAmount.ToString("N2")</h5>
+                        </div>
+
+                        @if (Model.Subtotal < 100)
                         {
-                            <a asp-controller="Products" asp-action="Index" asp-route-categoryId="@category.Id"
-                               class="list-group-item list-group-item-action @(categoryId == category.Id ? "active" : "")">
-                                @category.Name
-                                <span class="badge bg-secondary float-end">@category.ProductCount</span>
+                            <div class="alert alert-info small">
+                                <i class="bi bi-info-circle"></i>
+                                Добавьте товаров на $@((100 - Model.Subtotal).ToString("N2")) для бесплатной доставки
+                            </div>
+                        }
+
+                        @if (Model.HasUnavailableItems)
+                        {
+                            <div class="alert alert-warning">
+                                В корзине есть недоступные товары. Пожалуйста, удалите их перед оформлением заказа.
+                            </div>
+                        }
+                        else
+                        {
+                            <a asp-controller="Checkout" asp-action="Index" class="btn btn-primary w-100 btn-lg">
+                                Оформить заказ
                             </a>
                         }
-                    }
+
+                        <a asp-controller="Products" asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">
+                            Продолжить покупки
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Products -->
-        <div class="col-lg-9">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2>@(ViewBag.CategoryName ?? "Все товары")</h2>
-                    @if (!string.IsNullOrEmpty(searchTerm))
-                    {
-                        <p class="text-muted mb-0">Результаты поиска для: "@searchTerm"</p>
-                    }
-                </div>
-
-                <!-- Sort dropdown -->
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                        Сортировка
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a class="dropdown-item @(currentSort == "name" ? "active" : "")"
-                               asp-route-categoryId="@categoryId" asp-route-search="@searchTerm" asp-route-sort="name">
-                                По названию
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item @(currentSort == "price_asc" ? "active" : "")"
-                               asp-route-categoryId="@categoryId" asp-route-search="@searchTerm" asp-route-sort="price_asc">
-                                Сначала дешёвые
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item @(currentSort == "price_desc" ? "active" : "")"
-                               asp-route-categoryId="@categoryId" asp-route-search="@searchTerm" asp-route-sort="price_desc">
-                                Сначала дорогие
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item @(currentSort == "rating" ? "active" : "")"
-                               asp-route-categoryId="@categoryId" asp-route-search="@searchTerm" asp-route-sort="rating">
-                                По рейтингу
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item @(currentSort == "newest" ? "active" : "")"
-                               asp-route-categoryId="@categoryId" asp-route-search="@searchTerm" asp-route-sort="newest">
-                                Новинки
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Products grid -->
-            @if (Model.Any())
-            {
-                <div class="row g-4">
-                    @foreach (var product in Model)
-                    {
-                        <div class="col-md-6 col-lg-4">
-                            <partial name="_ProductCard" model="product" />
-                        </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <div class="alert alert-info">
-                    <h4>Товары не найдены</h4>
-                    <p>Попробуйте изменить параметры поиска или выбрать другую категорию.</p>
-                    <a asp-action="Index" class="btn btn-primary">Посмотреть все товары</a>
-                </div>
-            }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-cart-x" style="font-size: 4rem; color: #ccc;"></i>
+            <h3 class="mt-3">Корзина пуста</h3>
+            <p class="text-muted">Добавьте товары, чтобы начать покупки</p>
+            <a asp-controller="Products" asp-action="Index" class="btn btn-primary">
+                Перейти в каталог
+            </a>
         </div>
-    </div>
+    }
 </div>
+
+@section Scripts {
+    <script>
+        async function updateQuantity(cartItemId, quantity) {
+            if (quantity < 1) return;
+
+            try {
+                const response = await fetch('@Url.Action("UpdateQuantity", "Cart")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ cartItemId, quantity })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('qty-' + cartItemId).value = quantity;
+                    document.getElementById('subtotal').textContent = '$' + data.subtotal.toFixed(2);
+                    document.getElementById('shipping').innerHTML = data.shippingCost === 0
+                        ? '<span class="text-success">Бесплатно</span>'
+                        : '$' + data.shippingCost.toFixed(2);
+                    document.getElementById('total').textContent = '$' + data.totalAmount.toFixed(2);
+
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    alert(data.message || 'Ошибка при обновлении количества');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Произошла ошибка при обновлении корзины');
+            }
+        }
+    </script>
+}

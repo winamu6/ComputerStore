@@ -1,5 +1,6 @@
 ﻿using ComputerStore.Domain.Entities;
 using ComputerStore.Domain.Interfaces;
+using ComputerStore.Domain.Interfaces.Repositories;
 using ComputerStore.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;

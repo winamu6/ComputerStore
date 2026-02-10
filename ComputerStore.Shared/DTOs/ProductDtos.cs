@@ -15,6 +15,7 @@ namespace ComputerStore.Shared.DTOs
         public string? ImageUrl { get; set; }
         public string? Manufacturer { get; set; }
         public string? Model { get; set; }
+        public string? SKU { get; set; }
         public bool IsAvailable { get; set; }
         public bool IsFeatured { get; set; }
         public double Rating { get; set; }

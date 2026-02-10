@@ -1,4 +1,5 @@
 ﻿using ComputerStore.Domain.Interfaces;
+using ComputerStore.Domain.Interfaces.Repositories;
 using ComputerStore.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;

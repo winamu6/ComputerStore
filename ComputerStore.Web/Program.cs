@@ -1,6 +1,7 @@
 using ComputerStore.Application.Abstractions;
 using ComputerStore.Application.Services;
 using ComputerStore.Domain.Interfaces;
+using ComputerStore.Domain.Interfaces.Repositories;
 using ComputerStore.Infrastructure.Data;
 using ComputerStore.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
@@ -73,19 +74,26 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
-// Заполнение базы данных начальными данными
+// Инициализация базы данных и ролей
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
+        var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+        // Заполнение базы данных
         await DbSeeder.SeedAsync(context);
+
+        // Создание ролей и администратора
+        await SeedRolesAndAdminAsync(userManager, roleManager);
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ошибка при заполнении базы данных");
+        logger.LogError(ex, "Ошибка при инициализации базы данных");
     }
 }
 
@@ -110,6 +118,11 @@ app.UseAuthorization();
 
 app.UseSession();
 
+// Маршруты для Admin Area
+app.MapControllerRoute(
+    name: "admin",
+    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
@@ -117,3 +130,39 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 app.Run();
+
+// Метод для создания ролей и администратора
+async Task SeedRolesAndAdminAsync(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+{
+    // Создание ролей
+    string[] roleNames = { "Admin", "User" };
+    foreach (var roleName in roleNames)
+    {
+        var roleExist = await roleManager.RoleExistsAsync(roleName);
+        if (!roleExist)
+        {
+            await roleManager.CreateAsync(new IdentityRole(roleName));
+        }
+    }
+
+    // Создание администратора
+    var adminEmail = "admin@computerstore.com";
+    var adminPassword = "Admin@123";
+
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    if (adminUser == null)
+    {
+        adminUser = new IdentityUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true
+        };
+
+        var createAdmin = await userManager.CreateAsync(adminUser, adminPassword);
+        if (createAdmin.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+    }
+}
