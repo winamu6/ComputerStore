@@ -1,0 +1,184 @@
+﻿@model ComputerStore.Web.Models.CheckoutViewModel
+@{
+    ViewData["Title"] = "Оформление заказа";
+}
+
+<div class="container py-4">
+    <h2 class="mb-4">Оформление заказа</h2>
+
+    <div class="row">
+        <!-- Order Summary -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-cart-check"></i> Ваш заказ
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var item in Model.Cart.Items)
+                    {
+                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                            <div class="me-3">
+                                @if (!string.IsNullOrEmpty(item.ProductImageUrl))
+                                {
+                                    <img src="@item.ProductImageUrl" alt="@item.ProductName"
+                                         style="width: 80px; height: 80px; object-fit: contain;" />
+                                }
+                                else
+                                {
+                                    <div class="bg-light d-flex align-items-center justify-content-center"
+                                         style="width: 80px; height: 80px;">
+                                        <i class="bi bi-image text-muted"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">@item.ProductName</h6>
+                                <small class="text-muted">Количество: @item.Quantity</small>
+                            </div>
+                            <div class="text-end">
+                                <strong>$@item.Subtotal.ToString("N2")</strong>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Shipping Information Form -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-truck"></i> Адрес доставки
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="PlaceOrder" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="Order.ShippingAddress" class="form-label">Адрес*</label>
+                                <input asp-for="Order.ShippingAddress" class="form-control" required />
+                                <span asp-validation-for="Order.ShippingAddress" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Order.ShippingCity" class="form-label">Город*</label>
+                                <input asp-for="Order.ShippingCity" class="form-control" required />
+                                <span asp-validation-for="Order.ShippingCity" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="Order.ShippingPostalCode" class="form-label">Индекс*</label>
+                                <input asp-for="Order.ShippingPostalCode" class="form-control" required />
+                                <span asp-validation-for="Order.ShippingPostalCode" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="Order.ShippingCountry" class="form-label">Страна*</label>
+                                <input asp-for="Order.ShippingCountry" class="form-control" required />
+                                <span asp-validation-for="Order.ShippingCountry" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="mb-3">
+                            <label class="form-label">Способ оплаты*</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="Order.PaymentMethod"
+                                       value="0" id="creditCard" checked />
+                                <label class="form-check-label" for="creditCard">
+                                    <i class="bi bi-credit-card"></i> Кредитная карта
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="Order.PaymentMethod"
+                                       value="1" id="debitCard" />
+                                <label class="form-check-label" for="debitCard">
+                                    <i class="bi bi-credit-card-2-front"></i> Дебетовая карта
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="Order.PaymentMethod"
+                                       value="4" id="cash" />
+                                <label class="form-check-label" for="cash">
+                                    <i class="bi bi-cash"></i> Наличные при получении
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-3">
+                            <label asp-for="Order.Notes" class="form-label">Комментарий к заказу</label>
+                            <textarea asp-for="Order.Notes" class="form-control" rows="3"
+                                      placeholder="Например: время доставки, этаж, код домофона..."></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Оформить заказ
+                            </button>
+                            <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Вернуться в корзину
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Total -->
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Итого</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Товары (@Model.Cart.TotalItems шт.):</span>
+                        <strong>$@Model.Cart.Subtotal.ToString("N2")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Доставка:</span>
+                        <strong>
+                            @if (Model.Cart.ShippingCost == 0)
+                            {
+                                <span class="text-success">Бесплатно</span>
+                            }
+                            else
+                            {
+                                <span>$@Model.Cart.ShippingCost.ToString("N2")</span>
+                            }
+                        </strong>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between mb-3">
+                        <h5>Всего к оплате:</h5>
+                        <h5 class="text-primary">$@Model.Cart.TotalAmount.ToString("N2")</h5>
+                    </div>
+
+                    @if (Model.Customer != null)
+                    {
+                        <div class="alert alert-info small">
+                            <strong>Получатель:</strong><br />
+                            @Model.Customer.FullName<br />
+                            @if (!string.IsNullOrEmpty(Model.Customer.PhoneNumber))
+                            {
+                                <span>Телефон: @Model.Customer.PhoneNumber</span>
+                            }
+                        </div>
+                    }
+
+                    <div class="alert alert-warning small">
+                        <i class="bi bi-info-circle"></i> После оформления заказа с вами свяжется наш менеджер для подтверждения.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

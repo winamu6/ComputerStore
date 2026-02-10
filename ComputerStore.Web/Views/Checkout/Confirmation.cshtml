@@ -1,0 +1,158 @@
+﻿@model ComputerStore.Shared.DTOs.OrderDetailsDto
+@{
+    ViewData["Title"] = "Заказ оформлен";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Success Message -->
+            <div class="text-center mb-4">
+                <div class="mb-4">
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                </div>
+                <h2 class="text-success">Заказ успешно оформлен!</h2>
+                <p class="lead">Спасибо за покупку в нашем магазине</p>
+            </div>
+
+            <!-- Order Details Card -->
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Заказ #@Model.OrderNumber</h5>
+                        <span class="badge bg-light text-dark">@Model.StatusDisplay</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Order Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Дата заказа:</strong></p>
+                            <p>@Model.OrderDate.ToString("dd.MM.yyyy HH:mm")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Способ оплаты:</strong></p>
+                            <p>@Model.PaymentMethodDisplay</p>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Address -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2">Адрес доставки:</h6>
+                        <p class="mb-0">
+                            @Model.ShippingAddress<br />
+                            @Model.ShippingCity, @Model.ShippingPostalCode<br />
+                            @Model.ShippingCountry
+                        </p>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2">Состав заказа:</h6>
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                                <div class="me-3">
+                                    @if (!string.IsNullOrEmpty(item.ProductImageUrl))
+                                    {
+                                        <img src="@item.ProductImageUrl" alt="@item.ProductName"
+                                             style="width: 60px; height: 60px; object-fit: contain;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light d-flex align-items-center justify-content-center"
+                                             style="width: 60px; height: 60px;">
+                                            <i class="bi bi-image text-muted"></i>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">@item.ProductName</h6>
+                                    <small class="text-muted">
+                                        $@item.UnitPrice.ToString("N2") × @item.Quantity шт.
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <strong>$@item.TotalPrice.ToString("N2")</strong>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Order Total -->
+                    <div class="border-top pt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Сумма товаров:</span>
+                            <strong>$@Model.SubTotal.ToString("N2")</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Доставка:</span>
+                            <strong>
+                                @if (Model.ShippingCost == 0)
+                                {
+                                    <span class="text-success">Бесплатно</span>
+                                }
+                                else
+                                {
+                                    <span>$@Model.ShippingCost.ToString("N2")</span>
+                                }
+                            </strong>
+                        </div>
+                        @if (Model.DiscountAmount.HasValue && Model.DiscountAmount > 0)
+                        {
+                            <div class="d-flex justify-content-between mb-2 text-success">
+                                <span>Скидка:</span>
+                                <strong>-$@Model.DiscountAmount.Value.ToString("N2")</strong>
+                            </div>
+                        }
+                        <hr />
+                        <div class="d-flex justify-content-between">
+                            <h5>Итого:</h5>
+                            <h5 class="text-primary">$@Model.TotalAmount.ToString("N2")</h5>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="mt-4">
+                            <h6 class="border-bottom pb-2">Комментарий:</h6>
+                            <p class="mb-0">@Model.Notes</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Info Alert -->
+            <div class="alert alert-info mt-4">
+                <h6><i class="bi bi-info-circle"></i> Что дальше?</h6>
+                <ul class="mb-0">
+                    <li>Мы отправили подтверждение заказа на вашу электронную почту</li>
+                    <li>Наш менеджер свяжется с вами в ближайшее время</li>
+                    <li>Вы можете отследить статус заказа в личном кабинете</li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-2 mt-4">
+                <a asp-controller="Orders" asp-action="Details" asp-route-id="@Model.Id"
+                   class="btn btn-primary btn-lg">
+                    <i class="bi bi-eye"></i> Посмотреть детали заказа
+                </a>
+                <a asp-controller="Orders" asp-action="Index" class="btn btn-outline-primary">
+                    <i class="bi bi-list-ul"></i> Мои заказы
+                </a>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-house"></i> Вернуться на главную
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .card {
+            border: none;
+        }
+    </style>
+}

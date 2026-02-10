@@ -1,8 +1,105 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model ComputerStore.Web.Models.HomeViewModel
+@{
+    ViewData["Title"] = "Компьютерный магазин - Главная";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Hero Section -->
+<section class="hero bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Добро пожаловать в наш магазин!</h1>
+                <p class="lead mb-4">Лучшие компьютерные комплектующие и аксессуары</p>
+                <a asp-controller="Products" asp-action="Index" class="btn btn-light btn-lg">Смотреть каталог</a>
+            </div>
+            <div class="col-lg-6">
+                <img src="~/images/hero-computers.svg" alt="Computers" class="img-fluid" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="categories py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Категории товаров</h2>
+        <div class="row g-4">
+            @foreach (var category in Model.MainCategories)
+            {
+                <div class="col-md-4 col-lg-3">
+                    <a asp-controller="Products" asp-action="Index" asp-route-categoryId="@category.Id"
+                       class="text-decoration-none">
+                        <div class="card h-100 shadow-sm hover-shadow">
+                            @if (!string.IsNullOrEmpty(category.ImageUrl))
+                            {
+                                <img src="@category.ImageUrl" class="card-img-top" alt="@category.Name"
+                                     style="height: 200px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                                     style="height: 200px;">
+                                    <i class="bi bi-box-seam fs-1 text-muted"></i>
+                                </div>
+                            }
+                            <div class="card-body text-center">
+                                <h5 class="card-title">@category.Name</h5>
+                                <p class="card-text text-muted small">@category.ProductCount товаров</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products Section -->
+<section class="featured-products bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Рекомендуемые товары</h2>
+        <div class="row g-4">
+            @foreach (var product in Model.FeaturedProducts)
+            {
+                <div class="col-md-6 col-lg-3">
+                    <partial name="_ProductCard" model="product" />
+                </div>
+            }
+        </div>
+        <div class="text-center mt-4">
+            <a asp-controller="Products" asp-action="Index" class="btn btn-primary">Смотреть все товары</a>
+        </div>
+    </div>
+</section>
+
+<!-- Top Rated Products Section -->
+<section class="top-rated py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Топ товаров по рейтингу</h2>
+        <div class="row g-4">
+            @foreach (var product in Model.TopRatedProducts)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <partial name="_ProductCard" model="product" />
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .hover-shadow {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hover-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+        }
+    </style>
+}

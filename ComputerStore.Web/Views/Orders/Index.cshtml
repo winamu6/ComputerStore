@@ -1,0 +1,82 @@
+﻿@model IEnumerable<ComputerStore.Shared.DTOs.OrderDto>
+@{
+    ViewData["Title"] = "Мои заказы";
+}
+
+<div class="container py-4">
+    <h2 class="mb-4">Мои заказы</h2>
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var order in Model)
+            {
+                <div class="col-12 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    <h6 class="mb-1">Заказ</h6>
+                                    <strong class="text-primary">#@order.OrderNumber</strong>
+                                </div>
+                                <div class="col-md-2">
+                                    <small class="text-muted d-block">Дата</small>
+                                    <strong>@order.OrderDate.ToString("dd.MM.yyyy")</strong>
+                                </div>
+                                <div class="col-md-2">
+                                    <small class="text-muted d-block">Статус</small>
+                                    @switch (order.Status)
+                                    {
+                                        case ComputerStore.Domain.Enums.OrderStatus.Pending:
+                                            <span class="badge bg-warning text-dark">@order.StatusDisplay</span>
+                                            break;
+                                        case ComputerStore.Domain.Enums.OrderStatus.Processing:
+                                            <span class="badge bg-info">@order.StatusDisplay</span>
+                                            break;
+                                        case ComputerStore.Domain.Enums.OrderStatus.Shipped:
+                                            <span class="badge bg-primary">@order.StatusDisplay</span>
+                                            break;
+                                        case ComputerStore.Domain.Enums.OrderStatus.Delivered:
+                                            <span class="badge bg-success">@order.StatusDisplay</span>
+                                            break;
+                                        case ComputerStore.Domain.Enums.OrderStatus.Cancelled:
+                                            <span class="badge bg-danger">@order.StatusDisplay</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@order.StatusDisplay</span>
+                                            break;
+                                    }
+                                </div>
+                                <div class="col-md-2">
+                                    <small class="text-muted d-block">Товаров</small>
+                                    <strong>@order.ItemsCount шт.</strong>
+                                </div>
+                                <div class="col-md-2">
+                                    <small class="text-muted d-block">Сумма</small>
+                                    <strong class="text-primary">$@order.TotalAmount.ToString("N2")</strong>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <a asp-action="Details" asp-route-id="@order.Id" 
+                                       class="btn btn-primary btn-sm">
+                                        <i class="bi bi-eye"></i> Детали
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-bag-x" style="font-size: 4rem; color: #ccc;"></i>
+            <h3 class="mt-3">У вас пока нет заказов</h3>
+            <p class="text-muted">Начните покупки в нашем магазине</p>
+            <a asp-controller="Products" asp-action="Index" class="btn btn-primary">
+                <i class="bi bi-shop"></i> Перейти в каталог
+            </a>
+        </div>
+    }
+</div>

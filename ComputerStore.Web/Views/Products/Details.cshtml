@@ -1,0 +1,253 @@
+﻿@model ComputerStore.Web.Models.ProductDetailsViewModel
+@{
+    ViewData["Title"] = Model.Product.Name;
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Главная</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Products" asp-action="Index">Каталог</a></li>
+            <li class="breadcrumb-item">
+                <a asp-controller="Products" asp-action="Index" asp-route-categoryId="@Model.Product.Category.Id">
+                    @Model.Product.Category.Name
+                </a>
+            </li>
+            <li class="breadcrumb-item active">@Model.Product.Name</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Product Images -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    @if (Model.Product.Images.Any())
+                    {
+                        <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                @for (int i = 0; i < Model.Product.Images.Count; i++)
+                                {
+                                    var image = Model.Product.Images[i];
+                                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                                        <img src="@image.ImageUrl" class="d-block w-100" alt="@image.AltText"
+                                             style="height: 400px; object-fit: contain;" />
+                                    </div>
+                                }
+                            </div>
+                            @if (Model.Product.Images.Count > 1)
+                            {
+                                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                </button>
+                            }
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(Model.Product.ImageUrl))
+                    {
+                        <img src="@Model.Product.ImageUrl" alt="@Model.Product.Name" class="img-fluid"
+                             style="max-height: 400px; width: 100%; object-fit: contain;" />
+                    }
+                    else
+                    {
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                            <i class="bi bi-image fs-1 text-muted"></i>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="col-lg-6">
+            <h1 class="h2">@Model.Product.Name</h1>
+
+            @if (!string.IsNullOrEmpty(Model.Product.Manufacturer))
+            {
+                <p class="text-muted">Производитель: <strong>@Model.Product.Manufacturer</strong></p>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Product.SKU))
+            {
+                <p class="text-muted small">Артикул: @Model.Product.SKU</p>
+            }
+
+            <!-- Rating -->
+            @if (Model.Product.ReviewCount > 0)
+            {
+                <div class="mb-3">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        if (i <= Model.Product.Rating)
+                        {
+                            <i class="bi bi-star-fill text-warning"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-star text-warning"></i>
+                        }
+                    }
+                    <span class="ms-2">@Model.Product.Rating.ToString("N1") (@Model.Product.ReviewCount отзывов)</span>
+                </div>
+            }
+
+            <!-- Price -->
+            <div class="mb-4">
+                @if (Model.Product.HasDiscount)
+                {
+                    <h3 class="text-danger">
+                        $@Model.Product.FinalPrice.ToString("N2")
+                        <small class="text-decoration-line-through text-muted fs-5">$@Model.Product.Price.ToString("N2")</small>
+                        <span class="badge bg-danger ms-2">-@((int)((Model.Product.Price - Model.Product.DiscountPrice!.Value) / Model.Product.Price * 100))%</span>
+                    </h3>
+                }
+                else
+                {
+                    <h3 class="text-primary">$@Model.Product.Price.ToString("N2")</h3>
+                }
+            </div>
+
+            <!-- Stock -->
+            <div class="mb-4">
+                @if (Model.Product.InStock)
+                {
+                    <p class="text-success fs-5">
+                        <i class="bi bi-check-circle-fill"></i> В наличии (@Model.Product.StockQuantity шт.)
+                    </p>
+                }
+                else
+                {
+                    <p class="text-danger fs-5">
+                        <i class="bi bi-x-circle-fill"></i> Нет в наличии
+                    </p>
+                }
+            </div>
+
+            <!-- Description -->
+            <div class="mb-4">
+                <h5>Описание</h5>
+                <p>@Model.Product.Description</p>
+            </div>
+
+            <!-- Add to Cart -->
+            @if (Model.Product.InStock)
+            {
+                <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                    <input type="hidden" name="productId" value="@Model.Product.Id" />
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Количество</label>
+                            <input type="number" name="quantity" class="form-control" value="1" min="1" max="@Model.Product.StockQuantity" />
+                        </div>
+                        <div class="col-md-8">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-cart-plus"></i> Добавить в корзину
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            }
+        </div>
+    </div>
+
+    <!-- Specifications -->
+    @if (Model.Product.Specifications.Any())
+    {
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3>Характеристики</h3>
+                <div class="card">
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0">
+                            <tbody>
+                                @foreach (var spec in Model.Product.Specifications)
+                                {
+                                    <tr>
+                                        <td class="fw-bold" style="width: 30%">@spec.Name</td>
+                                        <td>@spec.Value</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Detailed Description -->
+    @if (!string.IsNullOrEmpty(Model.Product.DetailedDescription))
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <h3>Подробное описание</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <p>@Model.Product.DetailedDescription</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Reviews -->
+    @if (Model.Product.Reviews.Any())
+    {
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3>Отзывы (@Model.Product.ReviewCount)</h3>
+                @foreach (var review in Model.Product.Reviews.Take(5))
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>@review.CustomerName</strong>
+                                    @if (review.IsVerifiedPurchase)
+                                    {
+                                        <span class="badge bg-success ms-2">Подтверждённая покупка</span>
+                                    }
+                                </div>
+                                <div>
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= review.Rating)
+                                        {
+                                            <i class="bi bi-star-fill text-warning"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star text-warning"></i>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                            <h6 class="mt-2">@review.Title</h6>
+                            <p class="mb-1">@review.Comment</p>
+                            <small class="text-muted">@review.CreatedAt.ToString("dd.MM.yyyy")</small>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Related Products -->
+    @if (Model.RelatedProducts.Any())
+    {
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3>Похожие товары</h3>
+            </div>
+            @foreach (var product in Model.RelatedProducts)
+            {
+                <div class="col-md-6 col-lg-3 mt-3">
+                    <partial name="_ProductCard" model="product" />
+                </div>
+            }
+        </div>
+    }
+</div>
