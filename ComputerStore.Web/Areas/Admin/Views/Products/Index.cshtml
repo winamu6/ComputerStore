@@ -1,0 +1,156 @@
+﻿@model IEnumerable<ComputerStore.Shared.DTOs.ProductDto>
+@{
+    ViewData["Title"] = "Управление товарами";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Управление товарами</h2>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Добавить товар
+        </a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-admin">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">Изображение</th>
+                                <th>Название</th>
+                                <th>Категория</th>
+                                <th>Цена</th>
+                                <th>Скидка</th>
+                                <th>Остаток</th>
+                                <th>Рейтинг</th>
+                                <th style="width: 100px;">Статус</th>
+                                <th style="width: 200px;">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var product in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                        {
+                                            <img src="@product.ImageUrl" alt="@product.Name"
+                                                 class="img-thumbnail" style="width: 60px; height: 60px; object-fit: contain;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light d-flex align-items-center justify-content-center"
+                                                 style="width: 60px; height: 60px;">
+                                                <i class="bi bi-image text-muted"></i>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong>@product.Name</strong><br />
+                                        @if (!string.IsNullOrEmpty(product.Manufacturer))
+                                        {
+                                            <small class="text-muted">@product.Manufacturer @product.Model</small>
+                                        }
+                                    </td>
+                                    <td>@product.CategoryName</td>
+                                    <td>
+                                        <strong>$@product.Price.ToString("N2")</strong>
+                                    </td>
+                                    <td>
+                                        @if (product.DiscountPrice.HasValue)
+                                        {
+                                            <span class="text-success">$@product.DiscountPrice.Value.ToString("N2")</span>
+                                
+                                            <br />
+                                            <span class="badge bg-danger">-@product.DiscountPercentage%</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (product.StockQuantity > 10)
+                                        {
+                                            <span class="badge bg-success">@product.StockQuantity шт.</span>
+                                        }
+                                        else if (product.StockQuantity > 0)
+                                        {
+                                            <span class="badge bg-warning text-dark">@product.StockQuantity шт.</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Нет в наличии</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (product.ReviewCount > 0)
+                                        {
+                                            <span>
+                                                <i class="bi bi-star-fill text-warning"></i> @product.Rating.ToString("N1")
+                                            </span>
+                                
+                                            <br />
+                                            <small class="text-muted">(@product.ReviewCount)</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Нет отзывов</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (product.IsAvailable)
+                                        {
+                                            <span class="badge bg-success">Активен</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Неактивен</span>
+                                        }
+                                        @if (product.IsFeatured)
+                                        {
+                                            <br />
+                                
+                                            <span class="badge bg-info mt-1">Рекомендуем</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group-vertical btn-group-sm w-100" role="group">
+                                            <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id"
+                                               asp-area="" target="_blank" class="btn btn-outline-info btn-sm">
+                                                <i class="bi bi-eye"></i> Просмотр
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-warning btn-sm">
+                                                <i class="bi bi-pencil"></i> Редактировать
+                                            </a>
+                                            <form asp-action="Delete" asp-route-id="@product.Id" method="post"
+                                                  onsubmit="return confirm('Вы уверены, что хотите удалить этот товар?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-danger btn-sm w-100">
+                                                    <i class="bi bi-trash"></i> Удалить
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <h4><i class="bi bi-info-circle"></i> Нет товаров</h4>
+            <p>Начните с добавления товаров или импортируйте каталог.</p>
+            <a asp-action="Create" class="btn btn-primary">Добавить первый товар</a>
+            <a asp-controller="Import" asp-action="Index" class="btn btn-success">Импортировать каталог</a>
+        </div>
+    }
+</div>

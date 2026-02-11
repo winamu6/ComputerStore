@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using ComputerStore.Application.Abstractions;
 using ComputerStore.Domain.Entities;
 using ComputerStore.Domain.Interfaces;
 using ComputerStore.Shared.DTOs;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -28,8 +30,11 @@ namespace ComputerStore.Application.Services
 
         public async Task<IEnumerable<CategoryDto>> GetMainCategoriesAsync()
         {
-            var categories = await _unitOfWork.Categories.GetMainCategoriesAsync();
-            return _mapper.Map<IEnumerable<CategoryDto>>(categories);
+            return await _unitOfWork.Categories.Query()
+                .Where(c => c.ParentCategoryId == null)
+                .OrderBy(c => c.Name)
+                .ProjectTo<CategoryDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<CategoryDto>> GetSubCategoriesAsync(int parentId)

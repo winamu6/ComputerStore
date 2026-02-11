@@ -1,0 +1,93 @@
+﻿/* Admin Panel Styles */
+
+#wrapper {
+    min-height: 100vh;
+}
+
+#sidebar-wrapper {
+    min-height: 100vh;
+    width: 250px;
+    margin-left: -250px;
+    transition: margin 0.3s ease;
+}
+
+    #sidebar-wrapper .sidebar-heading {
+        padding: 1rem;
+        font-size: 1.2rem;
+    }
+
+    #sidebar-wrapper .list-group-item {
+        border: none;
+        border-radius: 0;
+        padding: 1rem 1.5rem;
+    }
+
+        #sidebar-wrapper .list-group-item:hover {
+            background-color: #343a40 !important;
+        }
+
+        #sidebar-wrapper .list-group-item.active {
+            background-color: #007bff !important;
+        }
+
+#page-content-wrapper {
+    min-width: 100vw;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: 0;
+}
+
+@media (min-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: 0;
+    }
+
+    #page-content-wrapper {
+        min-width: 0;
+        width: 100%;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: -250px;
+    }
+}
+
+/* Dashboard Cards */
+.card {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+/* Table Styles */
+.table-admin {
+    background: white;
+}
+
+    .table-admin th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+/* Button Styles */
+.btn-group-sm > .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: -250px;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: 0;
+    }
+}

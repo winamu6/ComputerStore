@@ -1,0 +1,192 @@
+﻿@{
+    ViewData["Title"] = "Импорт каталога";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4">Импорт каталога</h2>
+
+    <div class="row">
+        <!-- JSON Import -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-filetype-json"></i> Импорт из JSON
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Загрузите JSON файл с каталогом товаров и категорий</p>
+
+                    <form asp-action="UploadJson" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label">Выберите JSON файл</label>
+                            <input type="file" name="file" class="form-control" accept=".json" required />
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-upload"></i> Загрузить JSON
+                        </button>
+                    </form>
+
+                    <hr />
+
+                    <div class="mt-3">
+                        <h6>Формат JSON файла:</h6>
+                        <pre class="bg-light p-3 rounded">
+                            <code>
+                                {
+                                  "categories": [
+                                    {
+                                      "name": "Процессоры",
+                                      "description": "CPU для ПК",
+                                      "imageUrl": "/images/cpu.jpg"
+                                    }
+                                  ],
+                                  "products": [
+                                    {
+                                      "name": "Intel Core i9",
+                                      "description": "Топовый CPU",
+                                      "categoryName": "Процессоры",
+                                      "price": 589.99,
+                                      "stockQuantity": 10,
+                                      "manufacturer": "Intel",
+                                      "model": "i9-14900K",
+                                      "sku": "INTEL-i9",
+                                      "isFeatured": true
+                                    }
+                                  ]
+                                }
+                            </code></pre>
+                    </div>
+
+                    <a asp-action="ExportJson" class="btn btn-outline-primary mt-3">
+                        <i class="bi bi-download"></i> Скачать текущий каталог (JSON)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Excel Import -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-earmark-excel"></i> Импорт из Excel
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Загрузите Excel файл (.xlsx) с товарами</p>
+
+                    <form asp-action="UploadExcel" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label">Выберите Excel файл</label>
+                            <input type="file" name="file" class="form-control"
+                                   accept=".xlsx,.xls" required />
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-upload"></i> Загрузить Excel
+                        </button>
+                    </form>
+
+                    <hr />
+
+                    <div class="mt-3">
+                        <h6>Структура Excel файла:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>A</th>
+                                        <th>B</th>
+                                        <th>C</th>
+                                        <th>D</th>
+                                        <th>E</th>
+                                        <th>F</th>
+                                        <th>G</th>
+                                        <th>H</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="fw-bold">
+                                        <td>Название*</td>
+                                        <td>Описание</td>
+                                        <td>Категория*</td>
+                                        <td>Цена*</td>
+                                        <td>Кол-во</td>
+                                        <td>Произв.</td>
+                                        <td>Модель</td>
+                                        <td>SKU</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Intel i9</td>
+                                        <td>CPU</td>
+                                        <td>Процессоры</td>
+                                        <td>589.99</td>
+                                        <td>10</td>
+                                        <td>Intel</td>
+                                        <td>i9-14900K</td>
+                                        <td>INTEL-i9</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <small class="text-muted">* - обязательные поля</small>
+                    </div>
+
+                    <a asp-action="ExportTemplate" class="btn btn-outline-success mt-3">
+                        <i class="bi bi-download"></i> Скачать шаблон Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Инструкции
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>Способы импорта каталога:</h6>
+                    <ol>
+                        <li>
+                            <strong>JSON файл:</strong>
+                            <ul>
+                                <li>Создайте JSON файл по указанному формату</li>
+                                <li>Загрузите файл через форму выше</li>
+                                <li>Система автоматически создаст категории и товары</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Excel файл:</strong>
+                            <ul>
+                                <li>Скачайте шаблон Excel</li>
+                                <li>Заполните данными (первая строка - заголовки)</li>
+                                <li>Загрузите заполненный файл</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Экспорт текущего каталога:</strong>
+                            <ul>
+                                <li>Вы можете скачать текущий каталог в формате JSON</li>
+                                <li>Редактировать его и загрузить обратно</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="alert alert-warning mt-3">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Важно:</strong> При импорте дубликаты товаров не создаются.
+                        Если категория уже существует, используется существующая.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
