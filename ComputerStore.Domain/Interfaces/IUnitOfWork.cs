@@ -18,5 +18,7 @@ namespace ComputerStore.Domain.Interfaces
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();
         Task RollbackTransactionAsync();
+        Task ExecuteInTransactionAsync(Func<Task> action);
+
     }
 }

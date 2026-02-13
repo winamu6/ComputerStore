@@ -1,0 +1,134 @@
+﻿@model IEnumerable<ComputerStore.Shared.DTOs.OrderDto>
+@{
+    ViewData["Title"] = "Управление заказами";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var currentStatus = ViewBag.CurrentStatus as string ?? "all";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4">Управление заказами</h2>
+
+    <!-- Filters -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="btn-group" role="group">
+                        <a asp-action="Index" asp-route-status="all"
+                           class="btn @(currentStatus == "all" ? "btn-primary" : "btn-outline-primary")">
+                            Все заказы
+                        </a>
+                        <a asp-action="Index" asp-route-status="pending"
+                           class="btn @(currentStatus == "pending" ? "btn-warning" : "btn-outline-warning")">
+                            Ожидают
+                        </a>
+                        <a asp-action="Index" asp-route-status="processing"
+                           class="btn @(currentStatus == "processing" ? "btn-info" : "btn-outline-info")">
+                            В обработке
+                        </a>
+                        <a asp-action="Index" asp-route-status="shipped"
+                           class="btn @(currentStatus == "shipped" ? "btn-primary" : "btn-outline-primary")">
+                            Отправлены
+                        </a>
+                        <a asp-action="Index" asp-route-status="delivered"
+                           class="btn @(currentStatus == "delivered" ? "btn-success" : "btn-outline-success")">
+                            Доставлены
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <form class="d-inline-flex" method="get">
+                        <input type="text" name="search" class="form-control me-2" placeholder="Поиск по номеру..." />
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-admin">
+                        <thead>
+                            <tr>
+                                <th>Номер заказа</th>
+                                <th>Дата</th>
+                                <th>Покупатель</th>
+                                <th>Товаров</th>
+                                <th>Сумма</th>
+                                <th>Статус</th>
+                                <th>Оплачен</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@order.OrderNumber</strong>
+                                    </td>
+                                    <td>@order.OrderDate.ToString("dd.MM.yyyy HH:mm")</td>
+                                    <td>@order.CustomerName</td>
+                                    <td>
+                                        <span class="badge bg-secondary">@order.ItemsCount шт.</span>
+                                    </td>
+                                    <td>
+                                        <strong>$@order.TotalAmount.ToString("N2")</strong>
+                                    </td>
+                                    <td>
+                                        @switch (order.Status)
+                                        {
+                                            case ComputerStore.Domain.Enums.OrderStatus.Pending:
+                                                <span class="badge bg-warning text-dark">@order.StatusDisplay</span>
+                                                break;
+                                            case ComputerStore.Domain.Enums.OrderStatus.Processing:
+                                                <span class="badge bg-info">@order.StatusDisplay</span>
+                                                break;
+                                            case ComputerStore.Domain.Enums.OrderStatus.Shipped:
+                                                <span class="badge bg-primary">@order.StatusDisplay</span>
+                                                break;
+                                            case ComputerStore.Domain.Enums.OrderStatus.Delivered:
+                                                <span class="badge bg-success">@order.StatusDisplay</span>
+                                                break;
+                                            case ComputerStore.Domain.Enums.OrderStatus.Cancelled:
+                                                <span class="badge bg-danger">@order.StatusDisplay</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (order.IsPaid)
+                                        {
+                                            <i class="bi bi-check-circle-fill text-success">Да</i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-x-circle-fill text-danger">Нет</i>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-info">
+                                            <i class="bi bi-eye"></i> Детали
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <h4><i class="bi bi-info-circle"></i> Нет заказов</h4>
+            <p>Заказы будут отображаться здесь после их оформления покупателями.</p>
+        </div>
+    }
+</div>

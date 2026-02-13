@@ -98,72 +98,70 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
 
             try
             {
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
                 using var stream = new MemoryStream();
                 await file.CopyToAsync(stream);
 
                 using var package = new ExcelPackage(stream);
-                var worksheet = package.Workbook.Worksheets[0]; // Первый лист
+                var worksheet = package.Workbook.Worksheets[0];
 
                 var rowCount = worksheet.Dimension.Rows;
                 var importedCount = 0;
 
-                await _unitOfWork.BeginTransactionAsync();
-
-                for (int row = 2; row <= rowCount; row++) // Пропускаем заголовок
+                await _unitOfWork.ExecuteInTransactionAsync(async () =>
                 {
-                    var name = worksheet.Cells[row, 1].Value?.ToString();
-                    var description = worksheet.Cells[row, 2].Value?.ToString();
-                    var categoryName = worksheet.Cells[row, 3].Value?.ToString();
-                    var priceStr = worksheet.Cells[row, 4].Value?.ToString();
-                    var stockStr = worksheet.Cells[row, 5].Value?.ToString();
-                    var manufacturer = worksheet.Cells[row, 6].Value?.ToString();
-                    var model = worksheet.Cells[row, 7].Value?.ToString();
-                    var sku = worksheet.Cells[row, 8].Value?.ToString();
-
-                    if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(categoryName))
-                        continue;
-
-                    // Находим или создаём категорию
-                    var category = (await _unitOfWork.Categories.FindAsync(c => c.Name == categoryName)).FirstOrDefault();
-                    if (category == null)
+                    for (int row = 2; row <= rowCount; row++)
                     {
-                        category = new Category
+                        var name = worksheet.Cells[row, 1].Value?.ToString();
+                        var description = worksheet.Cells[row, 2].Value?.ToString();
+                        var categoryName = worksheet.Cells[row, 3].Value?.ToString();
+                        var priceStr = worksheet.Cells[row, 4].Value?.ToString();
+                        var stockStr = worksheet.Cells[row, 5].Value?.ToString();
+                        var manufacturer = worksheet.Cells[row, 6].Value?.ToString();
+                        var model = worksheet.Cells[row, 7].Value?.ToString();
+                        var sku = worksheet.Cells[row, 8].Value?.ToString();
+
+                        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(categoryName))
+                            continue;
+
+                        var category = (await _unitOfWork.Categories
+                            .FindAsync(c => c.Name == categoryName))
+                            .FirstOrDefault();
+
+                        if (category == null)
                         {
-                            Name = categoryName,
-                            Description = categoryName
+                            category = new Category
+                            {
+                                Name = categoryName,
+                                Description = categoryName
+                            };
+
+                            await _unitOfWork.Categories.AddAsync(category);
+                            await _unitOfWork.SaveChangesAsync();
+                        }
+
+                        var product = new Product
+                        {
+                            Name = name,
+                            Description = description ?? name,
+                            CategoryId = category.Id,
+                            Price = decimal.TryParse(priceStr, out var price) ? price : 0,
+                            StockQuantity = int.TryParse(stockStr, out var stock) ? stock : 0,
+                            Manufacturer = manufacturer,
+                            Model = model,
+                            SKU = sku ?? $"SKU-{Guid.NewGuid().ToString("N").Substring(0, 8)}",
+                            IsAvailable = true
                         };
-                        await _unitOfWork.Categories.AddAsync(category);
-                        await _unitOfWork.SaveChangesAsync();
+
+                        await _unitOfWork.Products.AddAsync(product);
+                        importedCount++;
                     }
-
-                    // Создаём товар
-                    var product = new Product
-                    {
-                        Name = name,
-                        Description = description ?? name,
-                        CategoryId = category.Id,
-                        Price = decimal.TryParse(priceStr, out var price) ? price : 0,
-                        StockQuantity = int.TryParse(stockStr, out var stock) ? stock : 0,
-                        Manufacturer = manufacturer,
-                        Model = model,
-                        SKU = sku ?? $"SKU-{Guid.NewGuid().ToString("N").Substring(0, 8)}",
-                        IsAvailable = true
-                    };
-
-                    await _unitOfWork.Products.AddAsync(product);
-                    importedCount++;
-                }
-
-                await _unitOfWork.CommitTransactionAsync();
+                });
 
                 TempData["Success"] = $"Успешно импортировано {importedCount} товаров из Excel";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                await _unitOfWork.RollbackTransactionAsync();
                 TempData["Error"] = $"Ошибка при импорте из Excel: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
@@ -256,18 +254,17 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
 
         private async Task ImportCatalogAsync(CatalogImportModel data)
         {
-            await _unitOfWork.BeginTransactionAsync();
-
-            try
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
-                // Импортируем категории
                 var categoryMap = new Dictionary<string, int>();
 
                 if (data.Categories != null)
                 {
                     foreach (var catData in data.Categories)
                     {
-                        var existing = (await _unitOfWork.Categories.FindAsync(c => c.Name == catData.Name)).FirstOrDefault();
+                        var existing = (await _unitOfWork.Categories
+                            .FindAsync(c => c.Name == catData.Name))
+                            .FirstOrDefault();
 
                         if (existing == null)
                         {
@@ -277,8 +274,10 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
                                 Description = catData.Description ?? catData.Name,
                                 ImageUrl = catData.ImageUrl
                             };
+
                             await _unitOfWork.Categories.AddAsync(category);
                             await _unitOfWork.SaveChangesAsync();
+
                             categoryMap[catData.Name] = category.Id;
                         }
                         else
@@ -288,21 +287,21 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
                     }
                 }
 
-                // Импортируем товары
                 if (data.Products != null)
                 {
                     foreach (var prodData in data.Products)
                     {
                         if (!categoryMap.ContainsKey(prodData.CategoryName))
                         {
-                            // Создаём категорию если её нет
                             var category = new Category
                             {
                                 Name = prodData.CategoryName,
                                 Description = prodData.CategoryName
                             };
+
                             await _unitOfWork.Categories.AddAsync(category);
                             await _unitOfWork.SaveChangesAsync();
+
                             categoryMap[prodData.CategoryName] = category.Id;
                         }
 
@@ -325,14 +324,7 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
                         await _unitOfWork.Products.AddAsync(product);
                     }
                 }
-
-                await _unitOfWork.CommitTransactionAsync();
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+            });
         }
     }
 }

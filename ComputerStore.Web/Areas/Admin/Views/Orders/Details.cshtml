@@ -1,0 +1,254 @@
+﻿@model ComputerStore.Shared.DTOs.OrderDetailsDto
+@{
+    ViewData["Title"] = $"Заказ #{Model.OrderNumber}";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Заказы</a></li>
+            <li class="breadcrumb-item active">Заказ #@Model.OrderNumber</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Order Header -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Заказ #@Model.OrderNumber</h4>
+                        @switch (Model.Status)
+                        {
+                            case ComputerStore.Domain.Enums.OrderStatus.Pending:
+                                <span class="badge bg-warning text-dark fs-6">@Model.StatusDisplay</span>
+                                break;
+                            case ComputerStore.Domain.Enums.OrderStatus.Processing:
+                                <span class="badge bg-info fs-6">@Model.StatusDisplay</span>
+                                break;
+                            case ComputerStore.Domain.Enums.OrderStatus.Shipped:
+                                <span class="badge bg-light text-dark fs-6">@Model.StatusDisplay</span>
+                                break;
+                            case ComputerStore.Domain.Enums.OrderStatus.Delivered:
+                                <span class="badge bg-success fs-6">@Model.StatusDisplay</span>
+                                break;
+                            case ComputerStore.Domain.Enums.OrderStatus.Cancelled:
+                                <span class="badge bg-danger fs-6">@Model.StatusDisplay</span>
+                                break;
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong>Дата заказа:</strong><br />
+                            @Model.OrderDate.ToString("dd MMMM yyyy, HH:mm")
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Способ оплаты:</strong><br />
+                            @Model.PaymentMethodDisplay
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Оплачен:</strong><br />
+                            @if (Model.IsPaid)
+                            {
+                                <span class="text-success">
+                                    <i class="bi bi-check-circle-fill"></i> Да
+                                    @if (Model.PaidDate.HasValue)
+                                    {
+                                        <span>(@Model.PaidDate.Value.ToString("dd.MM.yyyy"))</span>
+                                    }
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-warning">
+                                    <i class="bi bi-exclamation-circle-fill"></i> Нет
+                                </span>
+                            }
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.TrackingNumber))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <strong>Трек-номер:</strong><br />
+                                <code>@Model.TrackingNumber</code>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Info -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-person"></i> Информация о покупателе</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>
+                                <strong>Имя:</strong> @Model.Customer.FullName<br />
+                                @if (!string.IsNullOrEmpty(Model.Customer.PhoneNumber))
+                                {
+                                    <strong>Телефон:</strong> 
+                                    @Model.Customer.PhoneNumber
+                                
+                                    <br />
+                                }
+                                <strong>Email:</strong> @Model.Customer.UserId
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Адрес доставки:</strong><br />
+                            @Model.ShippingAddress<br />
+                            @Model.ShippingCity, @Model.ShippingPostalCode<br />
+                            @Model.ShippingCountry
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-box-seam"></i> Состав заказа</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Товар</th>
+                                    <th>Цена</th>
+                                    <th>Количество</th>
+                                    <th>Сумма</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                @if (!string.IsNullOrEmpty(item.ProductImageUrl))
+                                                {
+                                                    <img src="@item.ProductImageUrl" alt="@item.ProductName"
+                                                         class="me-3" style="width: 50px; height: 50px; object-fit: contain;" />
+                                                }
+                                                <div>
+                                                    <strong>@item.ProductName</strong>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>$@item.UnitPrice.ToString("N2")</td>
+                                        <td>@item.Quantity</td>
+                                        <td><strong>$@item.TotalPrice.ToString("N2")</strong></td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Сумма товаров:</strong></td>
+                                    <td><strong>$@Model.SubTotal.ToString("N2")</strong></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Доставка:</strong></td>
+                                    <td><strong>$@Model.ShippingCost.ToString("N2")</strong></td>
+                                </tr>
+                                @if (Model.DiscountAmount.HasValue && Model.DiscountAmount > 0)
+                                {
+                                    <tr class="text-success">
+                                        <td colspan="3" class="text-end"><strong>Скидка:</strong></td>
+                                        <td><strong>-$@Model.DiscountAmount.Value.ToString("N2")</strong></td>
+                                    </tr>
+                                }
+                                <tr class="table-primary">
+                                    <td colspan="3" class="text-end"><h5 class="mb-0">Итого:</h5></td>
+                                    <td><h5 class="mb-0 text-primary">$@Model.TotalAmount.ToString("N2")</h5></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-chat-left-text"></i> Комментарий покупателя</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">@Model.Notes</p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar with Actions -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="bi bi-gear"></i> Управление заказом</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="UpdateStatus" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="OrderId" value="@Model.Id" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Изменить статус:</label>
+                            <select name="Status" class="form-select">
+                                <option value="0" selected="@(Model.Status == ComputerStore.Domain.Enums.OrderStatus.Pending)">
+                                    Ожидает обработки
+                                </option>
+                                <option value="1" selected="@(Model.Status == ComputerStore.Domain.Enums.OrderStatus.Processing)">
+                                    В обработке
+                                </option>
+                                <option value="2" selected="@(Model.Status == ComputerStore.Domain.Enums.OrderStatus.Shipped)">
+                                    Отправлен
+                                </option>
+                                <option value="3" selected="@(Model.Status == ComputerStore.Domain.Enums.OrderStatus.Delivered)">
+                                    Доставлен
+                                </option>
+                                <option value="4" selected="@(Model.Status == ComputerStore.Domain.Enums.OrderStatus.Cancelled)">
+                                    Отменён
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Трек-номер:</label>
+                            <input type="text" name="TrackingNumber" class="form-control"
+                                   value="@Model.TrackingNumber" placeholder="Введите трек-номер" />
+                        </div>
+
+                        <button type="submit" class="btn btn-warning w-100">
+                            <i class="bi bi-save"></i> Обновить статус
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Информация</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>ID заказа:</strong> @Model.Id</p>
+                    <p><strong>Номер:</strong> @Model.OrderNumber</p>
+                    <p><strong>Дата:</strong> @Model.OrderDate.ToString("dd.MM.yyyy")</p>
+
+                    <hr />
+
+                    <div class="d-grid gap-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-left"></i> К списку заказов
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -6,9 +6,12 @@ using ComputerStore.Infrastructure.Data;
 using ComputerStore.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+ExcelPackage.License.SetNonCommercialOrganization("ComputerStore");
 
 // Добавляем DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

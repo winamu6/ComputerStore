@@ -1,6 +1,7 @@
 ﻿using ComputerStore.Domain.Interfaces;
 using ComputerStore.Domain.Interfaces.Repositories;
 using ComputerStore.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
@@ -130,5 +131,29 @@ namespace ComputerStore.Infrastructure.Repositories
             _transaction?.Dispose();
             _context.Dispose();
         }
+
+        public async Task ExecuteInTransactionAsync(Func<Task> action)
+        {
+            var strategy = _context.Database.CreateExecutionStrategy();
+
+            await strategy.ExecuteAsync(async () =>
+            {
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+
+                try
+                {
+                    await action();
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            });
+        }
+
     }
 }
