@@ -155,5 +155,9 @@ namespace ComputerStore.Infrastructure.Repositories
             });
         }
 
+        public IExecutionStrategy CreateExecutionStrategy()
+        {
+            return _context.Database.CreateExecutionStrategy();
+        }
     }
 }

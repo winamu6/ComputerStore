@@ -4,6 +4,7 @@ using ComputerStore.Domain.Entities;
 using ComputerStore.Domain.Enums;
 using ComputerStore.Domain.Interfaces;
 using ComputerStore.Shared.DTOs;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -45,73 +46,85 @@ namespace ComputerStore.Application.Services
 
         public async Task<OrderDetailsDto?> CreateOrderAsync(string userId, CreateOrderDto dto)
         {
-            try
+            var strategy = _unitOfWork.CreateExecutionStrategy();
+
+            return await strategy.ExecuteAsync(async () =>
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                var customer = await _unitOfWork.Customers.GetByUserIdAsync(userId);
-                if (customer == null)
-                    return null;
-
-                var cart = await _cartService.GetCartAsync(userId);
-                if (!cart.Items.Any() || cart.HasUnavailableItems)
-                    return null;
-
-                var order = new Order
+                try
                 {
-                    CustomerId = customer.Id,
-                    OrderNumber = GenerateOrderNumber(),
-                    OrderDate = DateTime.UtcNow,
-                    Status = OrderStatus.Pending,
-                    PaymentMethod = dto.PaymentMethod,
-                    IsPaid = false,
-                    ShippingAddress = dto.ShippingAddress,
-                    ShippingCity = dto.ShippingCity,
-                    ShippingPostalCode = dto.ShippingPostalCode,
-                    ShippingCountry = dto.ShippingCountry,
-                    SubTotal = cart.Subtotal,
-                    ShippingCost = cart.ShippingCost,
-                    TotalAmount = cart.TotalAmount,
-                    Notes = dto.Notes
-                };
-
-                await _unitOfWork.Orders.AddAsync(order);
-                await _unitOfWork.SaveChangesAsync();
-
-                foreach (var item in cart.Items)
-                {
-                    var orderItem = new OrderItem
+                    var customer = await _unitOfWork.Customers.GetByUserIdAsync(userId);
+                    if (customer == null)
                     {
-                        OrderId = order.Id,
-                        ProductId = item.ProductId,
-                        ProductName = item.ProductName,
-                        UnitPrice = item.FinalPrice,
-                        Quantity = item.Quantity,
-                        TotalPrice = item.Subtotal
+                        await _unitOfWork.RollbackTransactionAsync();
+                        return null;
+                    }
+
+                    var cart = await _cartService.GetCartAsync(userId);
+                    if (!cart.Items.Any() || cart.HasUnavailableItems)
+                    {
+                        await _unitOfWork.RollbackTransactionAsync();
+                        return null;
+                    }
+
+                    var order = new Order
+                    {
+                        CustomerId = customer.Id,
+                        OrderNumber = GenerateOrderNumber(),
+                        OrderDate = DateTime.UtcNow,
+                        Status = OrderStatus.Pending,
+                        PaymentMethod = dto.PaymentMethod,
+                        IsPaid = false,
+                        ShippingAddress = dto.ShippingAddress,
+                        ShippingCity = dto.ShippingCity,
+                        ShippingPostalCode = dto.ShippingPostalCode,
+                        ShippingCountry = dto.ShippingCountry,
+                        SubTotal = cart.Subtotal,
+                        ShippingCost = cart.ShippingCost,
+                        TotalAmount = cart.TotalAmount,
+                        Notes = dto.Notes
                     };
 
-                    order.OrderItems.Add(orderItem);
+                    await _unitOfWork.Orders.AddAsync(order);
+                    await _unitOfWork.SaveChangesAsync();
 
-                    var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
-                    if (product != null)
+                    foreach (var item in cart.Items)
                     {
-                        product.StockQuantity -= item.Quantity;
-                        await _unitOfWork.Products.UpdateAsync(product);
+                        var orderItem = new OrderItem
+                        {
+                            OrderId = order.Id,
+                            ProductId = item.ProductId,
+                            ProductName = item.ProductName,
+                            UnitPrice = item.FinalPrice,
+                            Quantity = item.Quantity,
+                            TotalPrice = item.Subtotal
+                        };
+
+                        order.OrderItems.Add(orderItem);
+
+                        var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
+                        if (product != null)
+                        {
+                            product.StockQuantity -= item.Quantity;
+                            await _unitOfWork.Products.UpdateAsync(product);
+                        }
                     }
+
+                    await _unitOfWork.SaveChangesAsync();
+                    await _cartService.ClearCartAsync(userId);
+
+                    await _unitOfWork.CommitTransactionAsync();
+
+                    var createdOrder = await _unitOfWork.Orders.GetOrderWithDetailsAsync(order.Id);
+                    return _mapper.Map<OrderDetailsDto>(createdOrder);
                 }
-
-                await _cartService.ClearCartAsync(userId);
-
-                await _unitOfWork.CommitTransactionAsync();
-
-                var createdOrder = await _unitOfWork.Orders.GetOrderWithDetailsAsync(order.Id);
-                return _mapper.Map<OrderDetailsDto>(createdOrder);
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+                catch
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    throw;
+                }
+            });
         }
 
         public async Task<bool> UpdateOrderStatusAsync(UpdateOrderStatusDto dto)
@@ -149,31 +162,37 @@ namespace ComputerStore.Application.Services
             if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Processing)
                 return false;
 
-            try
+            var strategy = _unitOfWork.CreateExecutionStrategy();
+
+            return await strategy.ExecuteAsync(async () =>
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                foreach (var item in order.OrderItems)
+                try
                 {
-                    var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
-                    if (product != null)
+                    foreach (var item in order.OrderItems)
                     {
-                        product.StockQuantity += item.Quantity;
-                        await _unitOfWork.Products.UpdateAsync(product);
+                        var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
+                        if (product != null)
+                        {
+                            product.StockQuantity += item.Quantity;
+                            await _unitOfWork.Products.UpdateAsync(product);
+                        }
                     }
+
+                    order.Status = OrderStatus.Cancelled;
+                    await _unitOfWork.Orders.UpdateAsync(order);
+                    await _unitOfWork.SaveChangesAsync();
+
+                    await _unitOfWork.CommitTransactionAsync();
+                    return true;
                 }
-
-                order.Status = OrderStatus.Cancelled;
-                await _unitOfWork.Orders.UpdateAsync(order);
-
-                await _unitOfWork.CommitTransactionAsync();
-                return true;
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+                catch
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    throw;
+                }
+            });
         }
 
         private string GenerateOrderNumber()

@@ -1,4 +1,5 @@
 ﻿using ComputerStore.Domain.Interfaces.Repositories;
+using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,6 +20,6 @@ namespace ComputerStore.Domain.Interfaces
         Task CommitTransactionAsync();
         Task RollbackTransactionAsync();
         Task ExecuteInTransactionAsync(Func<Task> action);
-
+        IExecutionStrategy CreateExecutionStrategy();
     }
 }
