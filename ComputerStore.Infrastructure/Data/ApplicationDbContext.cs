@@ -18,6 +18,7 @@ namespace ComputerStore.Infrastructure.Data
         public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<CartItem> CartItems => Set<CartItem>();
         public DbSet<Review> Reviews => Set<Review>();
+        public DbSet<Payment> Payments => Set<Payment>();
         public DbSet<ProductSpecification> ProductSpecifications => Set<ProductSpecification>();
         public DbSet<ProductImage> ProductImages => Set<ProductImage>();
 
@@ -33,6 +34,7 @@ namespace ComputerStore.Infrastructure.Data
             modelBuilder.Entity<OrderItem>().HasQueryFilter(oi => !oi.IsDeleted);
             modelBuilder.Entity<Customer>().HasQueryFilter(c => !c.IsDeleted);
             modelBuilder.Entity<Review>().HasQueryFilter(r => !r.IsDeleted);
+            modelBuilder.Entity<Payment>();
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

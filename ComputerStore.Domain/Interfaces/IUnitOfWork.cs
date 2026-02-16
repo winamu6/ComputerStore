@@ -14,6 +14,7 @@ namespace ComputerStore.Domain.Interfaces
         ICustomerRepository Customers { get; }
         ICartRepository CartItems { get; }
         IReviewRepository Reviews { get; }
+        IPaymentRepository Payments { get; }
 
         Task<int> SaveChangesAsync();
         Task BeginTransactionAsync();

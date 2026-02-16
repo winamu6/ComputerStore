@@ -61,6 +61,12 @@ namespace ComputerStore.Application.Mappings
                 .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => $"{src.Customer.FirstName} {src.Customer.LastName}"));
 
             CreateMap<CreateReviewDto, Review>();
+
+            CreateMap<Payment, PaymentDto>()
+                .ForMember(dest => dest.OrderNumber,
+                    opt => opt.MapFrom(src => src.Order.OrderNumber));
+
+            CreateMap<CreatePaymentDto, Payment>();
         }
     }
 }

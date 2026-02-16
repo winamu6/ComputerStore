@@ -20,6 +20,7 @@ namespace ComputerStore.Infrastructure.Repositories
         private ICustomerRepository? _customers;
         private ICartRepository? _cartItems;
         private IReviewRepository? _reviews;
+        private IPaymentRepository? _payments;
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -77,6 +78,15 @@ namespace ComputerStore.Infrastructure.Repositories
             {
                 _reviews ??= new ReviewRepository(_context);
                 return _reviews;
+            }
+        }
+
+        public IPaymentRepository Payments
+        {
+            get
+            {
+                _payments ??= new PaymentRepository(_context);
+                return _payments;
             }
         }
 

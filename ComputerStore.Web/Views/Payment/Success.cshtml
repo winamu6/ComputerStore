@@ -1,0 +1,166 @@
+﻿@model ComputerStore.Web.Models.PaymentSuccessViewModel
+@{
+    ViewData["Title"] = "Оплата успешна";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Success Message -->
+            <div class="text-center mb-4">
+                <div class="mb-4">
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 80px;"></i>
+                </div>
+                <h2 class="text-success mb-3">Оплата успешно выполнена!</h2>
+                <p class="lead text-muted">Спасибо за ваш заказ</p>
+            </div>
+
+            <!-- Payment Details -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-receipt"></i> Детали платежа
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong>Номер транзакции:</strong><br />
+                            <code class="fs-6">@Model.TransactionId</code>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Номер заказа:</strong><br />
+                            <span class="fs-6">@Model.Order.OrderNumber</span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Дата оплаты:</strong><br />
+                            @if (Model.Payment.ProcessedAt.HasValue)
+                            {
+                                <span>@Model.Payment.ProcessedAt.Value.ToString("dd.MM.yyyy HH:mm")</span>
+                            }
+                            else
+                            {
+                                <span>@Model.Payment.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+                            }
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Сумма оплаты:</strong><br />
+                            <span class="fs-5 text-success">$@Model.Payment.Amount.ToString("N2")</span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Способ оплаты:</strong><br />
+                            @switch (Model.Payment.PaymentMethod)
+                            {
+                                case ComputerStore.Domain.Enums.PaymentMethod.CreditCard:
+                                    <span><i class="bi bi-credit-card"></i> Кредитная карта</span>
+                                    break;
+                                case ComputerStore.Domain.Enums.PaymentMethod.DebitCard:
+                                    <span><i class="bi bi-credit-card-2-front"></i> Дебетовая карта</span>
+                                    break;
+                                case ComputerStore.Domain.Enums.PaymentMethod.Cash:
+                                    <span><i class="bi bi-cash"></i> Наличные</span>
+                                    break;
+                                default:
+                                    <span>@Model.Payment.PaymentMethodDisplay</span>
+                                    break;
+                            }
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Статус:</strong><br />
+                            @if (Model.Payment.Status == ComputerStore.Domain.Enums.PaymentStatus.Completed)
+                            {
+                                <span class="badge bg-success">Оплачено</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">@Model.Payment.StatusDisplay</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-box-seam"></i> Состав заказа
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var item in Model.Order.OrderItems)
+                    {
+                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                            <div class="me-3">
+                                @if (!string.IsNullOrEmpty(item.ProductImageUrl))
+                                {
+                                    <img src="@item.ProductImageUrl" alt="@item.ProductName"
+                                         style="width: 60px; height: 60px; object-fit: contain;" />
+                                }
+                            </div>
+                            <div class="flex-grow-1">
+                                <strong>@item.ProductName</strong><br />
+                                <small class="text-muted">Количество: @item.Quantity × $@item.UnitPrice.ToString("N2")</small>
+                            </div>
+                            <div class="text-end">
+                                <strong>$@item.TotalPrice.ToString("N2")</strong>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Товары:</span>
+                            <strong>$@Model.Order.SubTotal.ToString("N2")</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Доставка:</span>
+                            <strong>$@Model.Order.ShippingCost.ToString("N2")</strong>
+                        </div>
+                        <hr />
+                        <div class="d-flex justify-content-between">
+                            <h5>Итого:</h5>
+                            <h5 class="text-primary">$@Model.Order.TotalAmount.ToString("N2")</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-truck"></i> Информация о доставке
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>Адрес доставки:</strong><br />
+                        @Model.Order.ShippingAddress<br />
+                        @Model.Order.ShippingCity, @Model.Order.ShippingPostalCode<br />
+                        @Model.Order.ShippingCountry
+                    </p>
+
+                    <div class="alert alert-info mt-3 mb-0">
+                        <i class="bi bi-info-circle"></i>
+                        Ваш заказ передан в обработку. Мы свяжемся с вами для подтверждения доставки.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="text-center">
+                <a asp-controller="Orders" asp-action="Details" asp-route-id="@Model.Order.Id"
+                   class="btn btn-primary btn-lg">
+                    <i class="bi bi-eye"></i> Просмотреть заказ
+                </a>
+                <a asp-controller="Orders" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-list"></i> Все заказы
+                </a>
+                <a asp-controller="Products" asp-action="Index" class="btn btn-outline-success btn-lg">
+                    <i class="bi bi-shop"></i> Продолжить покупки
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

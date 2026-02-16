@@ -1,0 +1,16 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace ComputerStore.Domain.Enums
+{
+    public enum PaymentStatus
+    {
+        Pending = 0,
+        Processing = 1,
+        Completed = 2,
+        Failed = 3,
+        Cancelled = 4,
+        Refunded = 5
+    }
+}
