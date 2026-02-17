@@ -1,4 +1,5 @@
 ﻿using ComputerStore.Application.Abstractions;
+using ComputerStore.Domain.Enums;
 using ComputerStore.Shared.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,10 +26,25 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
         {
             ViewBag.CurrentStatus = status;
 
-            var orders = new List<OrderDto>();
+            IEnumerable<OrderDto> orders;
+
+            if (status == "all")
+            {
+                orders = await _orderService.GetAllOrdersAsync();
+            }
+            else if (Enum.TryParse<OrderStatus>(status, true, out var parsedStatus))
+            {
+                orders = await _orderService.GetOrdersByStatusAsync(parsedStatus);
+            }
+            else
+            {
+                orders = await _orderService.GetAllOrdersAsync();
+            }
 
             return View(orders);
         }
+
+
 
         // GET: Admin/Orders/Details/5
         public async Task<IActionResult> Details(int id)

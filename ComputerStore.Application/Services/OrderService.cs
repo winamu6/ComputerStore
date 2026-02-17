@@ -195,6 +195,19 @@ namespace ComputerStore.Application.Services
             });
         }
 
+        public async Task<IEnumerable<OrderDto>> GetAllOrdersAsync()
+        {
+            var orders = await _unitOfWork.Orders.GetAllAsync();
+            return _mapper.Map<IEnumerable<OrderDto>>(orders);
+        }
+
+        public async Task<IEnumerable<OrderDto>> GetOrdersByStatusAsync(OrderStatus status)
+        {
+            var orders = await _unitOfWork.Orders.FindAsync(o => o.Status == status);
+            return _mapper.Map<IEnumerable<OrderDto>>(orders);
+        }
+
+
         private string GenerateOrderNumber()
         {
             return $"ORD-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper()}";

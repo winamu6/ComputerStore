@@ -1,4 +1,5 @@
-﻿using ComputerStore.Shared.DTOs;
+﻿using ComputerStore.Domain.Enums;
+using ComputerStore.Shared.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,5 +14,8 @@ namespace ComputerStore.Application.Abstractions
         Task<OrderDetailsDto?> CreateOrderAsync(string userId, CreateOrderDto dto);
         Task<bool> UpdateOrderStatusAsync(UpdateOrderStatusDto dto);
         Task<bool> CancelOrderAsync(int orderId, string userId);
+        Task<IEnumerable<OrderDto>> GetAllOrdersAsync();
+        Task<IEnumerable<OrderDto>> GetOrdersByStatusAsync(OrderStatus status);
+
     }
 }
