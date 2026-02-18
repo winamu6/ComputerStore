@@ -67,7 +67,7 @@ namespace ComputerStore.Infrastructure.Repositories
                 .Include(p => p.Category)
                 .Include(p => p.Specifications)
                 .Include(p => p.Images)
-                .Include(p => p.Reviews.Where(r => r.IsApproved))
+                .Include(p => p.Reviews.Where(r => r.IsApproved && !r.IsDeleted))
                     .ThenInclude(r => r.Customer)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -97,7 +97,6 @@ namespace ComputerStore.Infrastructure.Repositories
 
             return product;
         }
-
 
         public override async Task<Product?> GetByIdAsync(int id)
         {

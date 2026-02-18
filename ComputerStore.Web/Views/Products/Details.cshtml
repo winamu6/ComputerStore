@@ -1,4 +1,6 @@
-﻿@model ComputerStore.Web.Models.ProductDetailsViewModel
+﻿@using ComputerStore.Application.Abstractions
+@model ComputerStore.Web.Models.ProductDetailsViewModel
+@inject IReviewService _reviewService
 @{
     ViewData["Title"] = Model.Product.Name;
 }
@@ -251,3 +253,9 @@
         </div>
     }
 </div>
+
+@{
+    var reviews = await _reviewService.GetProductReviewsAsync(Model.Product.Id);
+    ViewBag.ProductId = Model.Product.Id;
+}
+<partial name="_ProductReviews" model="reviews" />

@@ -12,7 +12,6 @@ namespace ComputerStore.Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<Review> builder)
         {
             builder.ToTable("Reviews");
-
             builder.HasKey(r => r.Id);
 
             builder.Property(r => r.Rating)
@@ -32,23 +31,28 @@ namespace ComputerStore.Infrastructure.Data.Configurations
 
             builder.Property(r => r.IsApproved)
                 .IsRequired()
+                .HasDefaultValue(true);
+
+            builder.Property(r => r.IsDeleted)
+                .IsRequired()
                 .HasDefaultValue(false);
 
             builder.Property(r => r.HelpfulCount)
                 .IsRequired()
                 .HasDefaultValue(0);
 
+            builder.Property(r => r.NotHelpfulCount)
+                .IsRequired()
+                .HasDefaultValue(0);
+
             builder.Property(r => r.CreatedAt)
                 .IsRequired();
-
-            builder.Property(r => r.IsDeleted)
-                .IsRequired()
-                .HasDefaultValue(false);
 
             builder.HasIndex(r => r.ProductId);
             builder.HasIndex(r => r.CustomerId);
             builder.HasIndex(r => r.IsApproved);
             builder.HasIndex(r => r.Rating);
+            builder.HasIndex(r => r.IsDeleted);
 
             builder.HasOne(r => r.Product)
                 .WithMany(p => p.Reviews)
@@ -59,6 +63,11 @@ namespace ComputerStore.Infrastructure.Data.Configurations
                 .WithMany(c => c.Reviews)
                 .HasForeignKey(r => r.CustomerId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(r => r.Order)
+                .WithMany()
+                .HasForeignKey(r => r.OrderId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasCheckConstraint("CK_Review_Rating", "[Rating] >= 1 AND [Rating] <= 5");
         }

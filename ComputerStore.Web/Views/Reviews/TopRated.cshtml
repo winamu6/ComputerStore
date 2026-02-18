@@ -1,0 +1,117 @@
+﻿@model IEnumerable<ComputerStore.Shared.DTOs.TopRatedProductDto>
+@{
+    ViewData["Title"] = "Товары с лучшим рейтингом";
+}
+
+<div class="container py-4">
+    <h2 class="mb-4">
+        <i class="bi bi-star-fill text-warning"></i> Товары с лучшим рейтингом
+    </h2>
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var product in Model)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100 shadow-sm product-card">
+                        @if (!string.IsNullOrEmpty(product.ProductImageUrl))
+                        {
+                            <img src="@product.ProductImageUrl" class="card-img-top" alt="@product.ProductName"
+                                 style="height: 200px; object-fit: contain; padding: 15px;" />
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                                 style="height: 200px;">
+                                <i class="bi bi-image text-muted fs-1"></i>
+                            </div>
+                        }
+
+                        <!-- Top Rated Badge -->
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-warning text-dark">
+                                <i class="bi bi-trophy-fill"></i> ТОП
+                            </span>
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">@product.ProductName</h6>
+
+                            <!-- Rating -->
+                            <div class="mb-2">
+                                <div class="d-flex align-items-center">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= Math.Floor(product.AverageRating))
+                                        {
+                                            <i class="bi bi-star-fill text-warning"></i>
+                                        }
+                                        else if (i - 0.5 <= product.AverageRating)
+                                        {
+                                            <i class="bi bi-star-half text-warning"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star text-warning"></i>
+                                        }
+                                    }
+                                    <span class="ms-2">
+                                        <strong>@product.AverageRating.ToString("N1")</strong>
+                                    </span>
+                                </div>
+                                <small class="text-muted">(@product.ReviewCount отзывов)</small>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="mt-auto">
+                                @if (product.DiscountPrice.HasValue)
+                                {
+                                    <div class="mb-1">
+                                        <span class="text-muted text-decoration-line-through">
+                                            $@product.Price.ToString("N2")
+                                        </span>
+                                        <span class="badge bg-danger ms-2">
+                                            -@(((product.Price - product.DiscountPrice.Value) / product.Price * 100).ToString("N0"))%
+                                        </span>
+                                    </div>
+                                    <h5 class="text-success mb-0">
+                                        $@product.DiscountPrice.Value.ToString("N2")
+                                    </h5>
+                                }
+                                else
+                                {
+                                    <h5 class="text-primary mb-0">
+                                        $@product.Price.ToString("N2")
+                                    </h5>
+                                }
+                            </div>
+
+                            <a asp-controller="Products" asp-action="Details" asp-route-id="@product.ProductId"
+                               class="btn btn-primary btn-sm mt-3 w-100">
+                                Подробнее
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Пока нет товаров с достаточным количеством отзывов
+        </div>
+    }
+</div>
+
+<style>
+    .product-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+</style>
