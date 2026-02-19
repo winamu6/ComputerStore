@@ -1,0 +1,301 @@
+﻿@model ComputerStore.Domain.Entities.Review
+@{
+    ViewData["Title"] = "Детали отзыва";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var product = ViewBag.Product as ComputerStore.Domain.Entities.Product;
+    var customer = ViewBag.Customer as ComputerStore.Domain.Entities.Customer;
+    var order = ViewBag.Order as ComputerStore.Domain.Entities.Order;
+}
+
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Отзывы</a></li>
+            <li class="breadcrumb-item active">Детали отзыва #@Model.Id</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Review Details -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-left-text"></i> Детали отзыва
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Product Info -->
+                    <div class="mb-4 pb-4 border-bottom">
+                        <h6 class="text-muted">Товар</h6>
+                        @if (product != null)
+                        {
+                            <div class="d-flex align-items-center">
+                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                {
+                                    <img src="@product.ImageUrl" alt="@product.Name"
+                                         style="width: 80px; height: 80px; object-fit: contain;" class="me-3" />
+                                }
+                                <div>
+                                    <h5>@product.Name</h5>
+                                    <a asp-controller="Products" asp-action="Details"
+                                       asp-route-id="@product.Id" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-box-arrow-up-right"></i> Открыть товар
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Customer Info -->
+                    <div class="mb-4 pb-4 border-bottom">
+                        <h6 class="text-muted">Покупатель</h6>
+                        @if (customer != null)
+                        {
+                            <p class="mb-1">
+                                <strong>Имя:</strong> @customer.FirstName @customer.LastName
+                            </p>
+                            @if (!string.IsNullOrEmpty(customer.UserId))
+                            {
+                                <p class="mb-1">
+                                    <strong>Email:</strong> @customer.UserId
+                                </p>
+                            }
+                            @if (!string.IsNullOrEmpty(customer.PhoneNumber))
+                            {
+                                <p class="mb-1">
+                                    <strong>Телефон:</strong> @customer.PhoneNumber
+                                </p>
+                            }
+                        }
+                    </div>
+
+                    <!-- Order Info -->
+                    @if (Model.OrderId.HasValue && order != null)
+                    {
+                        <div class="mb-4 pb-4 border-bottom">
+                            <h6 class="text-muted">Заказ</h6>
+                            <p class="mb-1">
+                                <strong>Номер заказа:</strong> @order.OrderNumber
+                            </p>
+                            <p class="mb-1">
+                                <strong>Дата заказа:</strong> @order.OrderDate.ToString("dd.MM.yyyy")
+                            </p>
+                            <p class="mb-1">
+                                <strong>Статус:</strong>
+                                <span class="badge bg-info">@order.Status</span>
+                            </p>
+                            @if (Model.IsVerifiedPurchase)
+                            {
+                                <div class="alert alert-success mt-2">
+                                    <i class="bi bi-check-circle-fill"></i> Подтверждённая покупка
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <!-- Rating -->
+                    <div class="mb-4 pb-4 border-bottom">
+                        <h6 class="text-muted">Рейтинг</h6>
+                        <div class="mb-2">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= Model.Rating)
+                                {
+                                    <i class="bi bi-star-fill text-warning fs-3"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-star text-warning fs-3"></i>
+                                }
+                            }
+                        </div>
+                        <p class="text-muted mb-0">@Model.Rating из 5 звёзд</p>
+                    </div>
+
+                    <!-- Title -->
+                    <div class="mb-4 pb-4 border-bottom">
+                        <h6 class="text-muted">Заголовок</h6>
+                        <h5>@Model.Title</h5>
+                    </div>
+
+                    <!-- Comment -->
+                    <div class="mb-4 pb-4 border-bottom">
+                        <h6 class="text-muted">Комментарий</h6>
+                        <p class="mb-0">@Model.Comment</p>
+                    </div>
+
+                    <!-- Helpful Stats -->
+                    <div class="mb-4">
+                        <h6 class="text-muted">Полезность отзыва</h6>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <i class="bi bi-hand-thumbs-up text-success fs-2"></i>
+                                        <h3 class="mt-2">@Model.HelpfulCount</h3>
+                                        <small class="text-muted">Полезно</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <i class="bi bi-hand-thumbs-down text-danger fs-2"></i>
+                                        <h3 class="mt-2">@Model.NotHelpfulCount</h3>
+                                        <small class="text-muted">Не полезно</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dates -->
+                    <div>
+                        <small class="text-muted">
+                            <strong>Создан:</strong> @Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                        </small>
+                        @if (Model.UpdatedAt.HasValue)
+                        {
+                            <br />
+                            <small class="text-muted">
+                                <strong>Обновлён:</strong> @Model.UpdatedAt.Value.ToString("dd.MM.yyyy HH:mm")
+                            </small>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Status Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Статус
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.IsDeleted)
+                    {
+                        <div class="alert alert-secondary">
+                            <i class="bi bi-trash"></i> <strong>Удалён</strong>
+                        </div>
+                    }
+                    else if (Model.IsApproved)
+                    {
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle"></i> <strong>Одобрен</strong>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <i class="bi bi-clock"></i> <strong>На модерации</strong>
+                        </div>
+                    }
+
+                    @if (Model.IsVerifiedPurchase)
+                    {
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle-fill"></i> Подтверждённая покупка
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Actions Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">
+                        <i class="bi bi-gear"></i> Действия
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        @if (!Model.IsDeleted)
+                        {
+                            @if (!Model.IsApproved)
+                            {
+                                <form asp-action="Approve" asp-route-id="@Model.Id" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="bi bi-check-circle"></i> Одобрить отзыв
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="Reject" asp-route-id="@Model.Id" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-warning w-100">
+                                        <i class="bi bi-x-circle"></i> Отклонить отзыв
+                                    </button>
+                                </form>
+                            }
+
+                            <form asp-action="Delete" asp-route-id="@Model.Id" method="post"
+                                  onsubmit="return confirm('Удалить этот отзыв?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="bi bi-trash"></i> Удалить отзыв
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="Restore" asp-route-id="@Model.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-info w-100">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Восстановить отзыв
+                                </button>
+                            </form>
+
+                            <form asp-action="HardDelete" asp-route-id="@Model.Id" method="post"
+                                  onsubmit="return confirm('ВНИМАНИЕ! Удалить отзыв навсегда? Это действие необратимо!');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-dark w-100">
+                                    <i class="bi bi-trash-fill"></i> Удалить навсегда
+                                </button>
+                            </form>
+                        }
+
+                        <hr />
+
+                        <a asp-action="Index" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-arrow-left"></i> Назад к списку
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-square"></i> Информация
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <small>
+                        <p class="mb-2">
+                            <strong>ID отзыва:</strong> @Model.Id
+                        </p>
+                        <p class="mb-2">
+                            <strong>ID товара:</strong> @Model.ProductId
+                        </p>
+                        <p class="mb-2">
+                            <strong>ID покупателя:</strong> @Model.CustomerId
+                        </p>
+                        @if (Model.OrderId.HasValue)
+                        {
+                            <p class="mb-0">
+                                <strong>ID заказа:</strong> @Model.OrderId
+                            </p>
+                        }
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
