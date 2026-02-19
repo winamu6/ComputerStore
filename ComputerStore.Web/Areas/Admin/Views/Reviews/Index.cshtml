@@ -36,161 +36,212 @@
         </div>
     </div>
 
-    <!-- Reviews Table -->
+    <!-- Bulk Actions Form -->
     @if (Model.Any())
     {
-        <div class="card shadow">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Товар</th>
-                                <th>Покупатель</th>
-                                <th>Рейтинг</th>
-                                <th>Отзыв</th>
-                                <th>Дата</th>
-                                <th>Статус</th>
-                                <th>Полезность</th>
-                                <th>Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var review in Model)
-                            {
-                                <tr class="@(review.IsDeleted ? "table-secondary" : "")">
-                                    <td>
-                                        <a asp-controller="Products" asp-action="Details"
-                                           asp-route-id="@review.ProductId" target="_blank">
-                                            @review.ProductName
-                                        </a>
-                                    </td>
-                                    <td>
-                                        @review.CustomerName
-                                        @if (review.IsVerifiedPurchase)
-                                        {
-                                            <br />
-                                            <span class="badge bg-success">
-                                                <i class="bi bi-check-circle"></i> Подтверждённая покупка
-                                            </span>
-                                        }
-                                    </td>
-                                    <td>
-                                        <div>
-                                            @for (int i = 1; i <= 5; i++)
-                                            {
-                                                if (i <= review.Rating)
-                                                {
-                                                    <i class="bi bi-star-fill text-warning"></i>
-                                                }
-                                                else
-                                                {
-                                                    <i class="bi bi-star text-warning"></i>
-                                                }
-                                            }
-                                        </div>
-                                        <small class="text-muted">@review.Rating / 5</small>
-                                    </td>
-                                    <td>
-                                        <strong>@review.Title</strong>
-                                        <br />
-                                        <small class="text-muted">
-                                            @(review.Comment.Length > 100 ? review.Comment.Substring(0, 100) + "..." : review.Comment)
-                                        </small>
-                                        <br />
-                                        <a asp-action="Details" asp-route-id="@review.Id" class="small">
-                                            Читать полностью
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <small>
-                                            @review.CreatedAt.ToString("dd.MM.yyyy HH:mm")
-                                            @if (review.UpdatedAt != null)
+        <form id="bulkActionForm" asp-action="BulkAction" method="post">
+            @Html.AntiForgeryToken()
+
+            <!-- Bulk Actions Toolbar -->
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAll">
+                                <label class="form-check-label fw-bold" for="selectAll">
+                                    Выбрать все
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-10">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-success" onclick="submitBulkAction('approve')">
+                                    <i class="bi bi-check-circle"></i> Одобрить выбранные
+                                </button>
+                                <button type="button" class="btn btn-warning" onclick="submitBulkAction('reject')">
+                                    <i class="bi bi-x-circle"></i> Отклонить выбранные
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="submitBulkAction('delete')">
+                                    <i class="bi bi-trash"></i> Удалить выбранные
+                                </button>
+                                @if (currentFilter == "deleted")
+                                {
+                                    <button type="button" class="btn btn-info" onclick="submitBulkAction('restore')">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Восстановить выбранные
+                                    </button>
+                                    <button type="button" class="btn btn-dark" onclick="submitBulkAction('hardDelete')">
+                                        <i class="bi bi-trash-fill"></i> Удалить навсегда
+                                    </button>
+                                }
+                            </div>
+                            <span class="ms-3 text-muted" id="selectedCount">Выбрано: 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reviews Table -->
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;">
+                                        <input type="checkbox" id="selectAllTable" class="form-check-input">
+                                    </th>
+                                    <th>Товар</th>
+                                    <th>Покупатель</th>
+                                    <th>Рейтинг</th>
+                                    <th>Отзыв</th>
+                                    <th>Дата</th>
+                                    <th>Статус</th>
+                                    <th>Полезность</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var review in Model)
+                                {
+                                    <tr class="@(review.IsDeleted ? "table-secondary" : "")">
+                                        <td>
+                                            <input type="checkbox" name="selectedIds" value="@review.Id"
+                                                   class="form-check-input review-checkbox">
+                                        </td>
+                                        <td>
+                                            <a asp-controller="Products" asp-action="Details"
+                                               asp-route-id="@review.ProductId" target="_blank">
+                                                @review.ProductName
+                                            </a>
+                                        </td>
+                                        <td>
+                                            @review.CustomerName
+                                            @if (review.IsVerifiedPurchase)
                                             {
                                                 <br />
-                                                <span class="text-muted">Обновлён: @review.UpdatedAt?.ToString("dd.MM.yyyy")</span>
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check-circle"></i> Подтверждённая покупка
+                                                </span>
                                             }
-                                        </small>
-                                    </td>
-                                    <td>
-                                        @if (review.IsDeleted)
-                                        {
-                                            <span class="badge bg-secondary">Удалён</span>
-                                        }
-                                        else if (review.IsApproved)
-                                        {
-                                            <span class="badge bg-success">Одобрен</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-warning text-dark">На модерации</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        <small>
-                                            <i class="bi bi-hand-thumbs-up text-success"></i> @review.HelpfulCount
+                                        </td>
+                                        <td>
+                                            <div>
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    if (i <= review.Rating)
+                                                    {
+                                                        <i class="bi bi-star-fill text-warning"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="bi bi-star text-warning"></i>
+                                                    }
+                                                }
+                                            </div>
+                                            <small class="text-muted">@review.Rating / 5</small>
+                                        </td>
+                                        <td>
+                                            <strong>@review.Title</strong>
                                             <br />
-                                            <i class="bi bi-hand-thumbs-down text-danger"></i> @review.NotHelpfulCount
-                                        </small>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group-vertical btn-group-sm">
-                                            @if (!review.IsDeleted)
+                                            <small class="text-muted">
+                                                @(review.Comment.Length > 100 ? review.Comment.Substring(0, 100) + "..." : review.Comment)
+                                            </small>
+                                            <br />
+                                            <a asp-action="Details" asp-route-id="@review.Id" class="small">
+                                                Читать полностью
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <small>
+                                                @review.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                                                @if (review.UpdatedAt != null)
+                                                {
+                                                    <br />
+                                                    <span class="text-muted">Обновлён: @review.UpdatedAt?.ToString("dd.MM.yyyy")</span>
+                                                }
+                                            </small>
+                                        </td>
+                                        <td>
+                                            @if (review.IsDeleted)
                                             {
-                                                @if (!review.IsApproved)
-                                                {
-                                                    <form asp-action="Approve" asp-route-id="@review.Id" method="post" class="d-inline">
-                                                        @Html.AntiForgeryToken()
-                                                        <button type="submit" class="btn btn-success btn-sm w-100">
-                                                            <i class="bi bi-check"></i> Одобрить
-                                                        </button>
-                                                    </form>
-                                                }
-                                                else
-                                                {
-                                                    <form asp-action="Reject" asp-route-id="@review.Id" method="post" class="d-inline">
-                                                        @Html.AntiForgeryToken()
-                                                        <button type="submit" class="btn btn-warning btn-sm w-100">
-                                                            <i class="bi bi-x"></i> Отклонить
-                                                        </button>
-                                                    </form>
-                                                }
-
-                                                <form asp-action="Delete" asp-route-id="@review.Id" method="post"
-                                                      onsubmit="return confirm('Удалить этот отзыв?');" class="d-inline">
-                                                    @Html.AntiForgeryToken()
-                                                    <button type="submit" class="btn btn-danger btn-sm w-100">
-                                                        <i class="bi bi-trash"></i> Удалить
-                                                    </button>
-                                                </form>
+                                                <span class="badge bg-secondary">Удалён</span>
+                                            }
+                                            else if (review.IsApproved)
+                                            {
+                                                <span class="badge bg-success">Одобрен</span>
                                             }
                                             else
                                             {
-                                                <form asp-action="Restore" asp-route-id="@review.Id" method="post" class="d-inline">
-                                                    @Html.AntiForgeryToken()
-                                                    <button type="submit" class="btn btn-info btn-sm w-100">
-                                                        <i class="bi bi-arrow-counterclockwise"></i> Восстановить
-                                                    </button>
-                                                </form>
-
-                                                <form asp-action="HardDelete" asp-route-id="@review.Id" method="post"
-                                                      onsubmit="return confirm('ВНИМАНИЕ! Удалить навсегда? Это действие необратимо!');"
-                                                      class="d-inline">
-                                                    @Html.AntiForgeryToken()
-                                                    <button type="submit" class="btn btn-dark btn-sm w-100">
-                                                        <i class="bi bi-trash-fill"></i> Удалить навсегда
-                                                    </button>
-                                                </form>
+                                                <span class="badge bg-warning text-dark">На модерации</span>
                                             }
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                                        </td>
+                                        <td>
+                                            <small>
+                                                <i class="bi bi-hand-thumbs-up text-success"></i> @review.HelpfulCount
+                                                <br />
+                                                <i class="bi bi-hand-thumbs-down text-danger"></i> @review.NotHelpfulCount
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group-vertical btn-group-sm">
+                                                @if (!review.IsDeleted)
+                                                {
+                                                    @if (!review.IsApproved)
+                                                    {
+                                                        <form asp-action="Approve" asp-route-id="@review.Id" method="post" class="d-inline">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="submit" class="btn btn-success btn-sm w-100">
+                                                                <i class="bi bi-check"></i> Одобрить
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                    else
+                                                    {
+                                                        <form asp-action="Reject" asp-route-id="@review.Id" method="post" class="d-inline">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="submit" class="btn btn-warning btn-sm w-100">
+                                                                <i class="bi bi-x"></i> Отклонить
+                                                            </button>
+                                                        </form>
+                                                    }
+
+                                                    <form asp-action="Delete" asp-route-id="@review.Id" method="post"
+                                                          onsubmit="return confirm('Удалить этот отзыв?');" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-danger btn-sm w-100">
+                                                            <i class="bi bi-trash"></i> Удалить
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    <form asp-action="Restore" asp-route-id="@review.Id" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-info btn-sm w-100">
+                                                            <i class="bi bi-arrow-counterclockwise"></i> Восстановить
+                                                        </button>
+                                                    </form>
+
+                                                    <form asp-action="HardDelete" asp-route-id="@review.Id" method="post"
+                                                          onsubmit="return confirm('ВНИМАНИЕ! Удалить навсегда? Это действие необратимо!');"
+                                                          class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-dark btn-sm w-100">
+                                                            <i class="bi bi-trash-fill"></i> Удалить навсегда
+                                                        </button>
+                                                    </form>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
     }
     else
     {
@@ -217,3 +268,84 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        // Выбрать все чекбоксы
+        document.getElementById('selectAll')?.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.review-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+            updateSelectedCount();
+        });
+
+        document.getElementById('selectAllTable')?.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.review-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+            document.getElementById('selectAll').checked = this.checked;
+            updateSelectedCount();
+        });
+
+        // Обновление счётчика выбранных
+        document.querySelectorAll('.review-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectedCount);
+        });
+
+        function updateSelectedCount() {
+            const selected = document.querySelectorAll('.review-checkbox:checked').length;
+            document.getElementById('selectedCount').textContent = `Выбрано: ${selected}`;
+
+            // Синхронизация чекбоксов "Выбрать все"
+            const totalCheckboxes = document.querySelectorAll('.review-checkbox').length;
+            const selectAll = document.getElementById('selectAll');
+            const selectAllTable = document.getElementById('selectAllTable');
+
+            if (selectAll) {
+                selectAll.checked = selected === totalCheckboxes && totalCheckboxes > 0;
+            }
+            if (selectAllTable) {
+                selectAllTable.checked = selected === totalCheckboxes && totalCheckboxes > 0;
+            }
+        }
+
+        // Отправка массового действия
+        function submitBulkAction(action) {
+            const selected = document.querySelectorAll('.review-checkbox:checked').length;
+
+            if (selected === 0) {
+                alert('Пожалуйста, выберите хотя бы один отзыв');
+                return;
+            }
+
+            let confirmMessage = '';
+            switch(action) {
+                case 'approve':
+                    confirmMessage = `Одобрить ${selected} отзыв(ов)?`;
+                    break;
+                case 'reject':
+                    confirmMessage = `Отклонить ${selected} отзыв(ов)?`;
+                    break;
+                case 'delete':
+                    confirmMessage = `Удалить ${selected} отзыв(ов)?`;
+                    break;
+                case 'restore':
+                    confirmMessage = `Восстановить ${selected} отзыв(ов)?`;
+                    break;
+                case 'hardDelete':
+                    confirmMessage = `ВНИМАНИЕ! Удалить навсегда ${selected} отзыв(ов)? Это действие необратимо!`;
+                    break;
+            }
+
+            if (confirm(confirmMessage)) {
+                const form = document.getElementById('bulkActionForm');
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = action;
+                form.appendChild(actionInput);
+                form.submit();
+            }
+        }
+
+        updateSelectedCount();
+    </script>
+}

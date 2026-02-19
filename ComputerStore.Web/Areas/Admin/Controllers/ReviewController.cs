@@ -48,7 +48,6 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            // Загружаем связанные данные
             var product = await _unitOfWork.Products.GetByIdAsync(review.ProductId);
             var customer = await _unitOfWork.Customers.GetByIdAsync(review.CustomerId);
 
@@ -81,7 +80,6 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
             await _unitOfWork.Reviews.UpdateAsync(review);
             await _unitOfWork.SaveChangesAsync();
 
-            // Обновляем рейтинг товара
             await UpdateProductRatingAsync(review.ProductId);
 
             TempData["Success"] = "Отзыв одобрен";
@@ -105,7 +103,6 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
             await _unitOfWork.Reviews.UpdateAsync(review);
             await _unitOfWork.SaveChangesAsync();
 
-            // Обновляем рейтинг товара
             await UpdateProductRatingAsync(review.ProductId);
 
             TempData["Success"] = "Отзыв отклонён";
@@ -131,7 +128,6 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
             await _unitOfWork.Reviews.UpdateAsync(review);
             await _unitOfWork.SaveChangesAsync();
 
-            // Обновляем рейтинг товара
             await UpdateProductRatingAsync(productId);
 
             TempData["Success"] = "Отзыв удалён";
@@ -155,7 +151,6 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
             await _unitOfWork.Reviews.UpdateAsync(review);
             await _unitOfWork.SaveChangesAsync();
 
-            // Обновляем рейтинг товара
             await UpdateProductRatingAsync(review.ProductId);
 
             TempData["Success"] = "Отзыв восстановлен";
@@ -179,11 +174,90 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
             await _unitOfWork.Reviews.DeleteAsync(review);
             await _unitOfWork.SaveChangesAsync();
 
-            // Обновляем рейтинг товара
             await UpdateProductRatingAsync(productId);
 
             TempData["Success"] = "Отзыв удалён навсегда";
             return RedirectToAction(nameof(Index), new { filter = "deleted" });
+        }
+
+        // POST: Admin/Reviews/BulkAction
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BulkAction(string action, int[] selectedIds)
+        {
+            if (selectedIds == null || selectedIds.Length == 0)
+            {
+                TempData["Error"] = "Не выбрано ни одного отзыва";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var affectedProductIds = new HashSet<int>();
+            int processedCount = 0;
+
+            foreach (var id in selectedIds)
+            {
+                var review = await _unitOfWork.Reviews.GetByIdAsync(id);
+                if (review == null) continue;
+
+                affectedProductIds.Add(review.ProductId);
+
+                switch (action)
+                {
+                    case "approve":
+                        review.IsApproved = true;
+                        review.UpdatedAt = DateTime.UtcNow;
+                        await _unitOfWork.Reviews.UpdateAsync(review);
+                        processedCount++;
+                        break;
+
+                    case "reject":
+                        review.IsApproved = false;
+                        review.UpdatedAt = DateTime.UtcNow;
+                        await _unitOfWork.Reviews.UpdateAsync(review);
+                        processedCount++;
+                        break;
+
+                    case "delete":
+                        review.IsDeleted = true;
+                        review.UpdatedAt = DateTime.UtcNow;
+                        await _unitOfWork.Reviews.UpdateAsync(review);
+                        processedCount++;
+                        break;
+
+                    case "restore":
+                        review.IsDeleted = false;
+                        review.UpdatedAt = DateTime.UtcNow;
+                        await _unitOfWork.Reviews.UpdateAsync(review);
+                        processedCount++;
+                        break;
+
+                    case "hardDelete":
+                        await _unitOfWork.Reviews.DeleteAsync(review);
+                        processedCount++;
+                        break;
+                }
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+
+            // Обновляем рейтинги всех затронутых товаров
+            foreach (var productId in affectedProductIds)
+            {
+                await UpdateProductRatingAsync(productId);
+            }
+
+            var actionName = action switch
+            {
+                "approve" => "одобрено",
+                "reject" => "отклонено",
+                "delete" => "удалено",
+                "restore" => "восстановлено",
+                "hardDelete" => "удалено навсегда",
+                _ => "обработано"
+            };
+
+            TempData["Success"] = $"Успешно {actionName} отзывов: {processedCount}";
+            return RedirectToAction(nameof(Index));
         }
 
         // Helper methods
@@ -236,5 +310,4 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
             await _unitOfWork.SaveChangesAsync();
         }
     }
-
 }
