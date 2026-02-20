@@ -20,8 +20,6 @@ namespace ComputerStore.Web.Controllers
 
         private string GetUserId()
         {
-            // Если пользователь авторизован, используем его имя
-            // Иначе используем session ID
             return _httpContextAccessor.HttpContext?.User?.Identity?.Name
                 ?? $"guest_{_httpContextAccessor.HttpContext?.Session.Id}";
         }
@@ -36,6 +34,7 @@ namespace ComputerStore.Web.Controllers
 
         // POST: Cart/AddToCart
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
         {
             var userId = GetUserId();
@@ -54,7 +53,6 @@ namespace ComputerStore.Web.Controllers
 
             TempData["Success"] = "Товар добавлен в корзину";
 
-            // Если запрос AJAX, возвращаем JSON
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
                 var cartCount = await _cartService.GetCartItemsCountAsync(userId);
@@ -66,16 +64,16 @@ namespace ComputerStore.Web.Controllers
 
         // POST: Cart/UpdateQuantity
         [HttpPost]
-        public async Task<IActionResult> UpdateQuantity(int cartItemId, int quantity)
+        public async Task<IActionResult> UpdateQuantity([FromBody] UpdateCartItemDto dto)
         {
-            var userId = GetUserId();
-            var dto = new UpdateCartItemDto
+            if (dto == null || dto.Quantity < 1)
             {
-                CartItemId = cartItemId,
-                Quantity = quantity
-            };
+                return Json(new { success = false, message = "Некорректные данные" });
+            }
 
+            var userId = GetUserId();
             var success = await _cartService.UpdateCartItemAsync(userId, dto);
+
             if (!success)
             {
                 return Json(new { success = false, message = "Не удалось обновить количество" });
@@ -93,6 +91,7 @@ namespace ComputerStore.Web.Controllers
 
         // POST: Cart/Remove
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Remove(int cartItemId)
         {
             var userId = GetUserId();
@@ -112,6 +111,7 @@ namespace ComputerStore.Web.Controllers
 
         // POST: Cart/Clear
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Clear()
         {
             var userId = GetUserId();
@@ -130,5 +130,4 @@ namespace ComputerStore.Web.Controllers
             return Json(new { count });
         }
     }
-
 }

@@ -34,6 +34,7 @@ namespace ComputerStore.Infrastructure.Data
             modelBuilder.Entity<OrderItem>().HasQueryFilter(oi => !oi.IsDeleted);
             modelBuilder.Entity<Customer>().HasQueryFilter(c => !c.IsDeleted);
             modelBuilder.Entity<Review>().HasQueryFilter(r => !r.IsDeleted);
+            modelBuilder.Entity<CartItem>().HasQueryFilter(c => !c.IsDeleted);
             modelBuilder.Entity<Payment>();
         }
 

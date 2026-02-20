@@ -24,7 +24,7 @@ namespace ComputerStore.Application.Services
 
         public async Task<CartDto> GetCartAsync(string userId)
         {
-            var cartItems = await _unitOfWork.CartItems.GetCartItemsByUserAsync(userId);
+            var cartItems = await _unitOfWork.CartItems.GetCartItemsByUserIdAsync(userId);
             var cartItemDtos = _mapper.Map<List<CartItemDto>>(cartItems);
 
             var cart = new CartDto
@@ -105,7 +105,7 @@ namespace ComputerStore.Application.Services
 
         public async Task<int> GetCartItemsCountAsync(string userId)
         {
-            var cartItems = await _unitOfWork.CartItems.GetCartItemsByUserAsync(userId);
+            var cartItems = await _unitOfWork.CartItems.GetCartItemsByUserIdAsync(userId);
             return cartItems.Sum(ci => ci.Quantity);
         }
     }
