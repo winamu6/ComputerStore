@@ -70,7 +70,8 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Details), new { id = dto.OrderId });
             }
 
-            var success = await _orderService.UpdateOrderStatusAsync(dto);
+            var success = await _orderService.UpdateOrderStatusAsync(dto.OrderId, dto.Status);
+
             if (!success)
             {
                 TempData["Error"] = "Не удалось обновить статус заказа";
@@ -83,5 +84,4 @@ namespace ComputerStore.Web.Areas.Admin.Controllers
             return RedirectToAction(nameof(Details), new { id = dto.OrderId });
         }
     }
-
 }

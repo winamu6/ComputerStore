@@ -60,7 +60,7 @@ namespace ComputerStore.Web.Controllers
                     ShippingAddress = customer?.Address ?? "",
                     ShippingCity = customer?.City ?? "",
                     ShippingPostalCode = customer?.PostalCode ?? "",
-                    ShippingCountry = customer?.Country ?? ""
+                    ShippingCountry = customer?.Country ?? "США"
                 }
             };
 
@@ -70,50 +70,60 @@ namespace ComputerStore.Web.Controllers
         // POST: Checkout/PlaceOrder
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> PlaceOrder(CreateOrderDto dto)
+        public async Task<IActionResult> PlaceOrder(CheckoutViewModel model)
         {
+            // Убираем валидацию Cart и Customer, проверяем только Order
+            ModelState.Remove("Cart");
+            ModelState.Remove("Customer");
+
             if (!ModelState.IsValid)
             {
                 var userId = GetUserId();
                 var cart = await _cartService.GetCartAsync(userId);
                 var customer = await _customerService.GetCustomerByUserIdAsync(userId);
 
-                var viewModel = new CheckoutViewModel
-                {
-                    Cart = cart,
-                    Customer = customer,
-                    Order = dto
-                };
+                model.Cart = cart;
+                model.Customer = customer;
 
-                return View("Index", viewModel);
+                return View("Index", model);
             }
 
-            var order = await _orderService.CreateOrderAsync(GetUserId(), dto);
+            var userId2 = GetUserId();
+            var order = await _orderService.CreateOrderAsync(userId2, model.Order);
 
             if (order == null)
             {
-                TempData["Error"] = "Не удалось создать заказ. Пожалуйста, попробуйте снова.";
+                TempData["Error"] = "Не удалось создать заказ. Проверьте наличие товаров.";
                 return RedirectToAction(nameof(Index));
             }
 
             TempData["Success"] = $"Заказ #{order.OrderNumber} успешно создан!";
-            return RedirectToAction(nameof(Confirmation), new { orderNumber = order.OrderNumber });
+
+            // Используем OrderNumber для редиректа
+            return RedirectToAction("Confirmation", new { orderNumber = order.OrderNumber });
         }
 
-        // GET: Checkout/Confirmation
+        // GET: Checkout/Confirmation?orderNumber=ORD-...
         public async Task<IActionResult> Confirmation(string orderNumber)
         {
+            if (string.IsNullOrEmpty(orderNumber))
+            {
+                TempData["Error"] = "Номер заказа не указан";
+                return RedirectToAction("Index", "Orders");
+            }
+
+            var userId = GetUserId();
             var order = await _orderService.GetOrderByNumberAsync(orderNumber);
 
             if (order == null)
             {
-                return NotFound();
+                TempData["Error"] = "Заказ не найден";
+                return RedirectToAction("Index", "Orders");
             }
-            
-            var userId = GetUserId();
+
             var customer = await _customerService.GetCustomerByUserIdAsync(userId);
 
-            if (customer == null || order.Customer.Id != customer.Id)
+            if (customer == null || order.CustomerId != customer.Id)
             {
                 return Forbid();
             }

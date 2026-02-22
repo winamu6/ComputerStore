@@ -62,11 +62,13 @@ namespace ComputerStore.Application.Mappings
                 .ForMember(dest => dest.ItemsCount,
                     opt => opt.MapFrom(src => src.OrderItems.Sum(oi => oi.Quantity)));
 
-            CreateMap<Order, OrderDetailsDto>();
+            // ВАЖНО: Добавляем маппинг CustomerId
+            CreateMap<Order, OrderDetailsDto>()
+                .ForMember(dest => dest.CustomerId, opt => opt.MapFrom(src => src.CustomerId));
 
             CreateMap<OrderItem, OrderItemDto>()
                 .ForMember(dest => dest.ProductImageUrl,
-                    opt => opt.MapFrom(src => src.Product.ImageUrl));
+                    opt => opt.MapFrom(src => src.Product != null ? src.Product.ImageUrl : null));
 
             CreateMap<CreateOrderDto, Order>();
 

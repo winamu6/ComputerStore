@@ -38,7 +38,7 @@ namespace ComputerStore.Web.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            var orders = await _orderService.GetOrdersByCustomerAsync(customer.Id);
+            var orders = await _orderService.GetCustomerOrdersAsync(userId);
             return View(orders);
         }
 
@@ -53,9 +53,8 @@ namespace ComputerStore.Web.Controllers
             }
 
             var userId = GetUserId();
-            var customer = await _customerService.GetCustomerByUserIdAsync(userId);
 
-            if (customer == null || order.Customer.Id != customer.Id)
+            if (order.Customer.UserId != userId)
             {
                 return Forbid();
             }
@@ -69,7 +68,8 @@ namespace ComputerStore.Web.Controllers
         public async Task<IActionResult> Cancel(int id)
         {
             var userId = GetUserId();
-            var success = await _orderService.CancelOrderAsync(id, userId);
+
+            var success = await _orderService.CancelOrderAsync(userId, id);
 
             if (!success)
             {

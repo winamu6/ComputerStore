@@ -39,7 +39,7 @@ namespace ComputerStore.Web.Controllers
                 return RedirectToAction(nameof(Create));
             }
 
-            var orders = await _orderService.GetOrdersByCustomerAsync(customer.Id);
+            var orders = await _orderService.GetCustomerOrdersAsync(userId);
 
             var viewModel = new ProfileViewModel
             {

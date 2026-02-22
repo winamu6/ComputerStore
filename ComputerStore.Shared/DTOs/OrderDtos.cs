@@ -24,6 +24,7 @@ namespace ComputerStore.Shared.DTOs
     public class OrderDetailsDto
     {
         public int Id { get; set; }
+        public int CustomerId { get; set; }
         public string OrderNumber { get; set; } = string.Empty;
         public DateTime OrderDate { get; set; }
         public OrderStatus Status { get; set; }
