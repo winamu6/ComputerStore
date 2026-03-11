@@ -22,6 +22,7 @@
 - [База данных](#-база-данных)
 - [Пользователи по умолчанию](#-пользователи-по-умолчанию)
 - [API и сервисы](#-api-и-сервисы)
+- [Тестирование](#-тестирование)
 - [Разработка](#-разработка)
 - [Лицензия](#-лицензия)
 
@@ -42,6 +43,7 @@
 - ✅ **FluentValidation** - декларативная валидация
 - ✅ **Responsive Design** - адаптивный интерфейс на Bootstrap 5
 - ✅ **Docker Support** - контейнеризация приложения
+- ✅ **Unit Tests** — ~96 тестов с xUnit, Moq и покрытием всех сервисов
 
 ---
 
@@ -480,6 +482,19 @@ ComputerStore/
     ├── Program.cs
     ├── appsettings.json
     └── Dockerfile                        # 🐳 Docker
+    │
+    └── 📁 tests/
+        ├── Dockerfile.tests                  # 🐳 Docker для тестов
+        └── 📁 ComputerStore.Tests/           # Unit-тесты
+            ├── 📁 Services/                  # Тесты бизнес-логики
+            │   ├── ProductServiceTests.cs    # 18 тестов
+            │   ├── CartServiceTests.cs       # 20 тестов
+            │   ├── OrderServiceTests.cs      # 17 тестов
+            │   └── ReviewServiceTests.cs     # 22 теста
+            ├── 📁 Domain/
+            │   └── DtoPropertyTests.cs       # 19 тестов
+            └── 📁 TestHelpers/
+                └── TestDataFactory.cs        # Фабрика тестовых данных
 ```
 
 ---
@@ -632,9 +647,83 @@ Task<bool> CancelPaymentAsync(int paymentId)
 
 ### Тестирование
 
+Подробнее о запуске тестов — в разделе [🧪 Тестирование](#-тестирование) ниже.
+
+---
+
+## 🧪 Тестирование
+
+Проект содержит ~96 unit-тестов, покрывающих всю бизнес-логику Application-слоя.
+
+### Стек тестирования
+
+| Пакет | Назначение |
+|-------|------------|
+| **xunit** | Тестовый фреймворк |
+| **Moq** | Мокирование зависимостей |
+| **FluentAssertions** | Читаемые ассерты |
+
+### Структура тестов и покрытие
+
+| Файл | Тестов | Что покрыто |
+|------|--------|-------------|
+| `ProductServiceTests` | 18 | CRUD, поиск, счётчик просмотров, маппинг скидок |
+| `CartServiceTests` | 20 | Корзина, расчёт доставки, проверки остатка и прав доступа |
+| `OrderServiceTests` | 17 | Создание/отмена заказов, смена статусов, восстановление стока |
+| `ReviewServiceTests` | 22 | Отзывы, рейтинги, подтверждённая покупка, голосование |
+| `DtoPropertyTests` | 19 | Вычисляемые свойства `ProductDto`, `CartDto`, `CartItemDto` |
+
+### Запуск тестов локально
+
 ```bash
-# Запуск тестов (когда будут добавлены)
+# Из корня проекта
+cd tests/ComputerStore.Tests
+dotnet restore
 dotnet test
+
+# С подробным выводом
+dotnet test --verbosity normal
+
+# С отчётом о покрытии кода
+dotnet add package coverlet.collector
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+### Запуск тестов через Docker
+
+Тесты вынесены в отдельный Docker-сервис с профилем `testing`, который не запускается по умолчанию вместе с приложением.
+
+```bash
+# Запустить тесты и вывести результат в консоль
+docker compose --profile testing run --rm tests
+
+# Пересобрать образ и запустить
+docker compose --profile testing up --build tests
+```
+
+TRX-отчёт автоматически сохраняется в `./test-results/results.trx`.  
+Файл можно открыть в Visual Studio или конвертировать в HTML с помощью `dotnet-trx2html`.
+
+### Паттерн тестирования
+
+Все тесты написаны по паттерну **AAA (Arrange → Act → Assert)** с полной изоляцией зависимостей через Moq:
+
+```csharp
+[Fact]
+public async Task AddToCartAsync_ExistingCartItem_IncrementsQuantity()
+{
+    // Arrange
+    var product = TestDataFactory.CreateProduct(1, stock: 10);
+    var existingItem = TestDataFactory.CreateCartItem(1, UserId, quantity: 2, product: product);
+    _cartRepoMock.Setup(r => r.GetCartItemAsync(UserId, 1)).ReturnsAsync(existingItem);
+
+    // Act
+    var result = await _sut.AddToCartAsync(UserId, new AddToCartDto { ProductId = 1, Quantity = 3 });
+
+    // Assert
+    Assert.True(result);
+    Assert.Equal(5, existingItem.Quantity); // 2 + 3
+}
 ```
 
 ---
@@ -666,10 +755,9 @@ dotnet test
 🧩 Компоненты:       50+
 ⚡ API endpoints:    40+
 📱 Страницы:         30+
+🧪 Unit-тестов:      ~96
 ```
 
 ---
 
 **Made with ❤️ using ASP.NET Core 10.0**
-
-*ComputerStore © 2024. All rights reserved.*

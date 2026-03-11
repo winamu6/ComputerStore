@@ -34,61 +34,61 @@ namespace ComputerStore.Infrastructure.Data
             {
                 Name = "Процессоры",
                 Description = "Центральные процессоры для настольных ПК",
-                //ImageUrl = "/images/categories/cpu.jpg"
+                ImageUrl = "/images/categories/cpu.jpg"
             },
             new Category
             {
                 Name = "Видеокарты",
                 Description = "Графические ускорители",
-                //ImageUrl = "/images/categories/gpu.jpg"
+                ImageUrl = "/images/categories/gpu.jpg"
             },
             new Category
             {
                 Name = "Материнские платы",
                 Description = "Платы для сборки ПК",
-                //ImageUrl = "/images/categories/motherboard.jpg"
+                ImageUrl = "/images/categories/motherboard.jpg"
             },
             new Category
             {
                 Name = "Оперативная память",
                 Description = "Модули RAM DDR4 и DDR5",
-                //ImageUrl = "/images/categories/ram.jpg"
+                ImageUrl = "/images/categories/ram.jpg"
             },
             new Category
             {
                 Name = "SSD накопители",
                 Description = "Твердотельные накопители",
-                //ImageUrl = "/images/categories/ssd.jpg"
+                ImageUrl = "/images/categories/ssd.jpg"
             },
             new Category
             {
                 Name = "HDD накопители",
                 Description = "Жёсткие диски",
-                //ImageUrl = "/images/categories/hdd.jpg"
+                ImageUrl = "/images/categories/hdd.jpg"
             },
             new Category
             {
                 Name = "Блоки питания",
                 Description = "БП для настольных ПК",
-                //ImageUrl = "/images/categories/psu.jpg"
+                ImageUrl = "/images/categories/psu.jpg"
             },
             new Category
             {
                 Name = "Корпуса",
                 Description = "Корпуса для сборки ПК",
-                //ImageUrl = "/images/categories/case.jpg"
+                ImageUrl = "/images/categories/case.jpg"
             },
             new Category
             {
                 Name = "Системы охлаждения",
                 Description = "Кулеры и системы водяного охлаждения",
-                //ImageUrl = "/images/categories/cooling.jpg"
+                ImageUrl = "/images/categories/cooling.jpg"
             },
             new Category
             {
                 Name = "Периферия",
                 Description = "Мыши, клавиатуры, наушники",
-                //ImageUrl = "/images/categories/peripherals.jpg"
+                ImageUrl = "/images/categories/peripherals.jpg"
             }
         };
 
