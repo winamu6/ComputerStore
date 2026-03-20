@@ -34,61 +34,61 @@ namespace ComputerStore.Infrastructure.Data
             {
                 Name = "Процессоры",
                 Description = "Центральные процессоры для настольных ПК",
-                ImageUrl = "/images/categories/cpu.jpg"
+                ImageUrl = "/images/categories/cpu.svg"
             },
             new Category
             {
                 Name = "Видеокарты",
                 Description = "Графические ускорители",
-                ImageUrl = "/images/categories/gpu.jpg"
+                ImageUrl = "/images/categories/gpu.svg"
             },
             new Category
             {
                 Name = "Материнские платы",
                 Description = "Платы для сборки ПК",
-                ImageUrl = "/images/categories/motherboard.jpg"
+                ImageUrl = "/images/categories/motherboard.svg"
             },
             new Category
             {
                 Name = "Оперативная память",
                 Description = "Модули RAM DDR4 и DDR5",
-                ImageUrl = "/images/categories/ram.jpg"
+                ImageUrl = "/images/categories/ram.svg"
             },
             new Category
             {
                 Name = "SSD накопители",
                 Description = "Твердотельные накопители",
-                ImageUrl = "/images/categories/ssd.jpg"
+                ImageUrl = "/images/categories/ssd.svg"
             },
             new Category
             {
                 Name = "HDD накопители",
                 Description = "Жёсткие диски",
-                ImageUrl = "/images/categories/hdd.jpg"
+                ImageUrl = "/images/categories/hdd.svg"
             },
             new Category
             {
                 Name = "Блоки питания",
                 Description = "БП для настольных ПК",
-                ImageUrl = "/images/categories/psu.jpg"
+                ImageUrl = "/images/categories/psu.svg"
             },
             new Category
             {
                 Name = "Корпуса",
                 Description = "Корпуса для сборки ПК",
-                ImageUrl = "/images/categories/case.jpg"
+                ImageUrl = "/images/categories/case.svg"
             },
             new Category
             {
                 Name = "Системы охлаждения",
                 Description = "Кулеры и системы водяного охлаждения",
-                ImageUrl = "/images/categories/cooling.jpg"
+                ImageUrl = "/images/categories/cooling.svg"
             },
             new Category
             {
                 Name = "Периферия",
                 Description = "Мыши, клавиатуры, наушники",
-                ImageUrl = "/images/categories/peripherals.jpg"
+                ImageUrl = "/images/categories/peripherals.svg"
             }
         };
 
@@ -117,7 +117,7 @@ namespace ComputerStore.Infrastructure.Data
                     SKU = "INTEL-i9-14900K",
                     IsAvailable = true,
                     IsFeatured = true,
-                    //ImageUrl = "/images/products/i9-14900k.jpg",
+                    //ImageUrl = "/images/products/i9-14900k.png",
                     Rating = 4.8
                 },
                 new Product
@@ -133,7 +133,7 @@ namespace ComputerStore.Infrastructure.Data
                     SKU = "AMD-R9-7950X",
                     IsAvailable = true,
                     IsFeatured = true,
-                    //ImageUrl = "/images/products/ryzen9-7950x.jpg",
+                    //ImageUrl = "/images/products/ryzen9-7950x.png",
                     Rating = 4.9
                 },
                 // Видеокарты
@@ -151,7 +151,7 @@ namespace ComputerStore.Infrastructure.Data
                     SKU = "NV-RTX-4090",
                     IsAvailable = true,
                     IsFeatured = true,
-                    //ImageUrl = "/images/products/rtx-4090.jpg",
+                    //ImageUrl = "/images/products/rtx-4090.png",
                     Rating = 5.0
                 },
                 new Product
@@ -167,7 +167,7 @@ namespace ComputerStore.Infrastructure.Data
                     SKU = "AMD-RX-7900XTX",
                     IsAvailable = true,
                     IsFeatured = true,
-                    //ImageUrl = "/images/products/rx-7900xtx.jpg",
+                    //ImageUrl = "/images/products/rx-7900xtx.png",
                     Rating = 4.7
                 },
                 // Оперативная память
@@ -183,7 +183,7 @@ namespace ComputerStore.Infrastructure.Data
                     Model = "Vengeance DDR5 32GB",
                     SKU = "CORS-DDR5-32GB",
                     IsAvailable = true,
-                    //ImageUrl = "/images/products/corsair-ddr5.jpg",
+                    //ImageUrl = "/images/products/corsair-ddr5.png",
                     Rating = 4.6
                 },
                 // SSD
@@ -200,7 +200,7 @@ namespace ComputerStore.Infrastructure.Data
                     SKU = "SAMS-990PRO-2TB",
                     IsAvailable = true,
                     IsFeatured = true,
-                    //ImageUrl = "/images/products/samsung-990pro.jpg",
+                    //ImageUrl = "/images/products/samsung-990pro.png",
                     Rating = 4.9
                 },
                 // Блоки питания
@@ -216,7 +216,7 @@ namespace ComputerStore.Infrastructure.Data
                     Model = "RM1000x",
                     SKU = "CORS-RM1000X",
                     IsAvailable = true,
-                    //ImageUrl = "/images/products/corsair-rm1000x.jpg",
+                    //ImageUrl = "/images/products/corsair-rm1000x.png",
                     Rating = 4.8
                 },
                 // Периферия
@@ -232,7 +232,7 @@ namespace ComputerStore.Infrastructure.Data
                     Model = "G Pro X Superlight",
                     SKU = "LOGI-GPRO-SL",
                     IsAvailable = true,
-                    //ImageUrl = "/images/products/logitech-gpro.jpg",
+                    //ImageUrl = "/images/products/logitech-gpro.png",
                     Rating = 4.7
                 }
             };

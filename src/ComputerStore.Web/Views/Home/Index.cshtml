@@ -32,14 +32,15 @@
                         <div class="card h-100 shadow-sm hover-shadow">
                             @if (!string.IsNullOrEmpty(category.ImageUrl))
                             {
-                                <img src="@category.ImageUrl" class="card-img-top" alt="@category.Name"
-                                     style="height: 200px; object-fit: cover;" />
+                                <div class="category-icon-wrapper">
+                                    <img src="@category.ImageUrl" class="w-100 h-100" alt="@category.Name"
+                                         style="object-fit: cover;" />
+                                </div>
                             }
                             else
                             {
-                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
-                                     style="height: 200px;">
-                                    <i class="bi bi-box-seam fs-1 text-muted"></i>
+                                <div class="category-icon-wrapper">
+                                    <i class="bi bi-box-seam" style="color: #adb5bd;"></i>
                                 </div>
                             }
                             <div class="card-body text-center">
@@ -97,9 +98,9 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .hover-shadow:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
-        }
+            .hover-shadow:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+            }
     </style>
 }

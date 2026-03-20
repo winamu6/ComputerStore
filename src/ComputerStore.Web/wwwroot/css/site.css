@@ -1,4 +1,4 @@
-html {
+ï»¿html {
     font-size: 14px;
 }
 
@@ -138,6 +138,28 @@ h1, h2, h3, h4, h5, h6 {
         box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
     }
 
+.category-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    overflow: hidden;
+}
+
+    .category-icon-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 1rem;
+    }
+
+}
+
+.category-icon-wrapper .bi {
+    font-size: 4rem;
+    line-height: 1;
+}
+
 /* === Buttons === */
 .btn {
     font-weight: 500;
@@ -190,7 +212,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .breadcrumb-item + .breadcrumb-item::before {
-    content: "›";
+    content: "ï¿½";
     font-size: 1.2rem;
 }
 
@@ -488,5 +510,4 @@ textarea:focus {
 .bi {
     vertical-align: -0.125em;
 }
-
 /* === End of Stylesheet === */
