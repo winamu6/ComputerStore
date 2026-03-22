@@ -117,7 +117,7 @@ namespace ComputerStore.Infrastructure.Data
                     SKU = "INTEL-i9-14900K",
                     IsAvailable = true,
                     IsFeatured = true,
-                    //ImageUrl = "/images/products/i9-14900k.png",
+                    ImageUrl = "/images/products/i9-14900k.webp",
                     Rating = 4.8
                 },
                 new Product
@@ -133,13 +133,13 @@ namespace ComputerStore.Infrastructure.Data
                     SKU = "AMD-R9-7950X",
                     IsAvailable = true,
                     IsFeatured = true,
-                    //ImageUrl = "/images/products/ryzen9-7950x.png",
+                    ImageUrl = "/images/products/ryzen9-7950x.webp",
                     Rating = 4.9
                 },
                 // Видеокарты
                 new Product
                 {
-                    Name = "NVIDIA GeForce RTX 4090",
+                    Name = "NVIDIA GeForce RTX 5090",
                     Description = "Флагманская видеокарта NVIDIA",
                     DetailedDescription = "24 ГБ GDDR6X памяти, поддержка Ray Tracing и DLSS 3.0",
                     Price = 1599.99m,
@@ -151,7 +151,7 @@ namespace ComputerStore.Infrastructure.Data
                     SKU = "NV-RTX-4090",
                     IsAvailable = true,
                     IsFeatured = true,
-                    //ImageUrl = "/images/products/rtx-4090.png",
+                    ImageUrl = "/images/products/rtx-5090.webp",
                     Rating = 5.0
                 },
                 new Product
@@ -167,7 +167,7 @@ namespace ComputerStore.Infrastructure.Data
                     SKU = "AMD-RX-7900XTX",
                     IsAvailable = true,
                     IsFeatured = true,
-                    //ImageUrl = "/images/products/rx-7900xtx.png",
+                    ImageUrl = "/images/products/rx-7900xtx.webp",
                     Rating = 4.7
                 },
                 // Оперативная память
@@ -183,7 +183,7 @@ namespace ComputerStore.Infrastructure.Data
                     Model = "Vengeance DDR5 32GB",
                     SKU = "CORS-DDR5-32GB",
                     IsAvailable = true,
-                    //ImageUrl = "/images/products/corsair-ddr5.png",
+                    ImageUrl = "/images/products/corsair-ddr5.webp",
                     Rating = 4.6
                 },
                 // SSD
@@ -200,7 +200,7 @@ namespace ComputerStore.Infrastructure.Data
                     SKU = "SAMS-990PRO-2TB",
                     IsAvailable = true,
                     IsFeatured = true,
-                    //ImageUrl = "/images/products/samsung-990pro.png",
+                    ImageUrl = "/images/products/samsung-990pro.webp",
                     Rating = 4.9
                 },
                 // Блоки питания
@@ -216,7 +216,7 @@ namespace ComputerStore.Infrastructure.Data
                     Model = "RM1000x",
                     SKU = "CORS-RM1000X",
                     IsAvailable = true,
-                    //ImageUrl = "/images/products/corsair-rm1000x.png",
+                    ImageUrl = "/images/products/corsair-rm1000x.webp",
                     Rating = 4.8
                 },
                 // Периферия
@@ -232,7 +232,7 @@ namespace ComputerStore.Infrastructure.Data
                     Model = "G Pro X Superlight",
                     SKU = "LOGI-GPRO-SL",
                     IsAvailable = true,
-                    //ImageUrl = "/images/products/logitech-gpro.png",
+                    ImageUrl = "/images/products/logitech-gpro.webp",
                     Rating = 4.7
                 }
             };
