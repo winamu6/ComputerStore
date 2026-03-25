@@ -66,13 +66,13 @@
             @if (Model.HasDiscount)
             {
                 <div>
-                    <span class="text-decoration-line-through text-muted">$@Model.Price.ToString("N2")</span>
+                    <span class="text-decoration-line-through text-muted">@Model.Price.ToString("N2")₽</span>
                 </div>
-                <h5 class="text-danger mb-0">$@Model.FinalPrice.ToString("N2")</h5>
+                <h5 class="text-danger mb-0">@Model.FinalPrice.ToString("N2")₽</h5>
             }
             else
             {
-                <h5 class="text-primary mb-0">$@Model.Price.ToString("N2")</h5>
+                <h5 class="text-primary mb-0">@Model.Price.ToString("N2")₽</h5>
             }
         </div>
 

@@ -53,7 +53,7 @@
                                 </div>
                                 <div class="col-md-2">
                                     <small class="text-muted d-block">Сумма</small>
-                                    <strong class="text-primary">$@order.TotalAmount.ToString("N2")</strong>
+                                    <strong class="text-primary">@order.TotalAmount.ToString("N2")₽</strong>
                                 </div>
                                 <div class="col-md-2 text-end">
                                     <a asp-action="Details" asp-route-id="@order.Id" 

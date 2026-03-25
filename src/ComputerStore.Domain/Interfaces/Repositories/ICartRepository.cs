@@ -13,5 +13,6 @@ namespace ComputerStore.Domain.Interfaces.Repositories
         Task<IEnumerable<CartItem>> GetCartWithDetailsAsync(string userId);
         Task<int> GetCartItemsCountAsync(string userId);
         Task ClearCartAsync(string userId);
+        Task AddOrUpdateAsync(string userId, int productId, int quantityToAdd);
     }
 }

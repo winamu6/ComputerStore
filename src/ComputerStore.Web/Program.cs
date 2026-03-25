@@ -123,6 +123,20 @@ app.UseAuthorization();
 
 app.UseSession();
 
+// Вывод маршрутов
+app.MapGet("/routes", (IEnumerable<EndpointDataSource> sources) =>
+{
+    var endpoints = sources
+        .SelectMany(s => s.Endpoints)
+        .OfType<RouteEndpoint>()
+        .Select(e => new
+        {
+            DisplayName = e.DisplayName
+        });
+
+    return endpoints;
+});
+
 // Маршруты для Admin Area
 app.MapControllerRoute(
     name: "admin",

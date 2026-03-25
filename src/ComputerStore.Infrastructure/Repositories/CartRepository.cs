@@ -63,5 +63,32 @@ namespace ComputerStore.Infrastructure.Repositories
             _dbSet.RemoveRange(cartItems);
             await _context.SaveChangesAsync();
         }
+
+        public async Task AddOrUpdateAsync(string userId, int productId, int quantityToAdd)
+        {
+            var existing = await _context.CartItems
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(c => c.UserId == userId && c.ProductId == productId);
+
+            if (existing != null)
+            {
+                int baseQty = existing.IsDeleted ? 0 : existing.Quantity;
+                existing.Quantity = baseQty + quantityToAdd;
+                existing.IsDeleted = false;
+                existing.UpdatedAt = DateTime.UtcNow;
+                _context.Entry(existing).State = EntityState.Modified;
+            }
+            else
+            {
+                var cartItem = new CartItem
+                {
+                    UserId = userId,
+                    ProductId = productId,
+                    Quantity = quantityToAdd,
+                    AddedDate = DateTime.UtcNow
+                };
+                await _context.CartItems.AddAsync(cartItem);
+            }
+        }
     }
 }

@@ -126,6 +126,7 @@ namespace ComputerStore.Infrastructure.Data
                     Description = "16-ядерный процессор AMD на архитектуре Zen 4",
                     DetailedDescription = "Мощный процессор с 16 ядрами и 32 потоками, частотой до 5.7 ГГц.",
                     Price = 549.99m,
+                    DiscountPrice = 399.99m,
                     StockQuantity = 20,
                     Category = categories.FirstOrDefault(c => c.Name == "Процессоры"),
                     Manufacturer = "AMD",

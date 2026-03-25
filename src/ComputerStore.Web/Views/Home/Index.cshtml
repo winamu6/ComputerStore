@@ -1,26 +1,135 @@
 ﻿@model ComputerStore.Web.Models.HomeViewModel
 @{
     ViewData["Title"] = "Компьютерный магазин - Главная";
+
+    var discounted = Model.FeaturedProducts
+        .Where(p => p.HasDiscount)
+        .ToList();
 }
 
 <!-- Hero Section -->
-<section class="hero bg-primary text-white py-5">
+<section class="hero text-white py-5">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
+        <div class="row align-items-center justify-content-center text-center text-lg-start">
+            <div class="col-lg-8">
                 <h1 class="display-4 fw-bold mb-4">Добро пожаловать в наш магазин!</h1>
-                <p class="lead mb-4">Лучшие компьютерные комплектующие и аксессуары</p>
-                <a asp-controller="Products" asp-action="Index" class="btn btn-light btn-lg">Смотреть каталог</a>
-            </div>
-            <div class="col-lg-6">
-                <img src="~/images/hero-computers.svg" alt="Computers" class="img-fluid" />
+                <p class="lead mb-4">Лучшие компьютерные комплектующие и аксессуары по выгодным ценам</p>
+                <a asp-controller="Products" asp-action="Index" class="btn btn-light btn-lg px-5">
+                    <i class="bi bi-grid me-2"></i>Смотреть каталог
+                </a>
             </div>
         </div>
     </div>
 </section>
 
+<!-- Sales Carousel Section -->
+@if (discounted.Any())
+{
+    <section class="sales-section py-5">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h2 class="mb-0">
+                    <span class="badge bg-danger me-2">%</span>Акции и скидки
+                </h2>
+                <a asp-controller="Products" asp-action="Index" class="btn btn-outline-danger btn-sm">
+                    Все акции <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div id="salesCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+
+                @* Индикаторы *@
+                @{
+                    // Группируем по 4 на слайд
+                    int itemsPerSlide = 4;
+                    int slideCount = (int)Math.Ceiling(discounted.Count / (double)itemsPerSlide);
+                }
+                @if (slideCount > 1)
+                {
+                    <div class="carousel-indicators carousel-indicators-custom">
+                        @for (int s = 0; s < slideCount; s++)
+                        {
+                            <button type="button"
+                                    data-bs-target="#salesCarousel"
+                                    data-bs-slide-to="@s"
+                                    class="@(s == 0 ? "active" : "")"
+                                    aria-label="Слайд @(s + 1)"></button>
+                        }
+                    </div>
+                }
+
+                <div class="carousel-inner">
+                    @for (int slide = 0; slide < slideCount; slide++)
+                    {
+                        var slideProducts = discounted.Skip(slide * itemsPerSlide).Take(itemsPerSlide).ToList();
+                        <div class="carousel-item @(slide == 0 ? "active" : "")">
+                            <div class="row g-3 px-1 pb-5">
+                                @foreach (var product in slideProducts)
+                                {
+                                    <div class="col-6 col-md-4 col-lg-3">
+                                        <div class="sale-card">
+                                            <div class="sale-badge">-@product.DiscountPercentage%</div>
+                                            <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id" class="sale-img-link">
+                                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                                {
+                                                    <img src="@product.ImageUrl" alt="@product.Name" class="sale-img" />
+                                                }
+                                                else
+                                                {
+                                                    <div class="sale-img-placeholder">
+                                                        <i class="bi bi-image fs-1 text-muted"></i>
+                                                    </div>
+                                                }
+                                            </a>
+                                            <div class="sale-body">
+                                                <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id"
+                                                   class="sale-title text-decoration-none text-dark">
+                                                    @product.Name
+                                                </a>
+                                                <p class="sale-category">@product.CategoryName</p>
+                                                <div class="sale-prices">
+                                                    <span class="sale-price-new">@product.FinalPrice.ToString("N0") ₽</span>
+                                                    <span class="sale-price-old">@product.Price.ToString("N0") ₽</span>
+                                                </div>
+                                                @if (product.InStock)
+                                                {
+                                                    <form asp-controller="Cart" asp-action="AddToCart" method="post" class="mt-2">
+                                                        <input type="hidden" name="productId" value="@product.Id" />
+                                                        <input type="hidden" name="quantity" value="1" />
+                                                        <button type="submit" class="btn btn-danger btn-sm w-100">
+                                                            <i class="bi bi-cart-plus me-1"></i>В корзину
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-secondary btn-sm w-100 mt-2" disabled>Нет в наличии</button>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (slideCount > 1)
+                {
+                    <button class="carousel-control-prev carousel-btn" type="button" data-bs-target="#salesCarousel" data-bs-slide="prev">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="carousel-control-next carousel-btn" type="button" data-bs-target="#salesCarousel" data-bs-slide="next">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                }
+            </div>
+        </div>
+    </section>
+}
+
 <!-- Categories Section -->
-<section class="categories py-5">
+<section class="categories py-5 bg-light">
     <div class="container">
         <h2 class="text-center mb-5">Категории товаров</h2>
         <div class="row g-4">
@@ -56,7 +165,7 @@
 </section>
 
 <!-- Featured Products Section -->
-<section class="featured-products bg-light py-5">
+<section class="featured-products py-5">
     <div class="container">
         <h2 class="text-center mb-5">Рекомендуемые товары</h2>
         <div class="row g-4">
@@ -74,7 +183,7 @@
 </section>
 
 <!-- Top Rated Products Section -->
-<section class="top-rated py-5">
+<section class="top-rated py-5 bg-light">
     <div class="container">
         <h2 class="text-center mb-5">Топ товаров по рейтингу</h2>
         <div class="row g-4">
@@ -90,17 +199,175 @@
 
 @section Styles {
     <style>
+        /* ── Hero ── */
         .hero {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
+        /* ── Sales carousel ── */
+        .sales-section {
+            background: #fff;
+        }
+
+        /* Карточка акционного товара */
+        .sale-card {
+            position: relative;
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .sale-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .sale-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #dc3545;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            z-index: 2;
+        }
+
+        .sale-img-link {
+            display: block;
+            background: #f8f9fa;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .sale-img {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            padding: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .sale-card:hover .sale-img {
+            transform: scale(1.05);
+        }
+
+        .sale-img-placeholder {
+            width: 100%;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f0f0;
+        }
+
+        .sale-body {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .sale-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .sale-category {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin: 4px 0 8px;
+        }
+
+        .sale-prices {
+            margin-top: auto;
+            margin-bottom: 4px;
+        }
+
+        .sale-price-new {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #dc3545;
+            display: block;
+        }
+
+        .sale-price-old {
+            font-size: 0.8rem;
+            color: #adb5bd;
+            text-decoration: line-through;
+        }
+
+        /* Стрелки */
+        .carousel-btn {
+            width: 42px;
+            height: 42px;
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            top: 40%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, box-shadow 0.2s;
+            opacity: 1;
+        }
+
+        .carousel-btn:hover {
+            background: #f8f9fa;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .carousel-btn i {
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .carousel-control-prev.carousel-btn { left: -20px; }
+        .carousel-control-next.carousel-btn { right: -20px; }
+
+        /* Индикаторы */
+        .carousel-indicators-custom {
+            bottom: 10px;
+        }
+
+        .carousel-indicators-custom button {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #dee2e6;
+            border: none;
+            opacity: 1;
+        }
+
+        .carousel-indicators-custom button.active {
+            background-color: #dc3545;
+        }
+
+        /* Прочее */
         .hover-shadow {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-            .hover-shadow:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
-            }
+        .hover-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+        }
     </style>
 }

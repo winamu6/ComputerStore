@@ -141,31 +141,31 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>$@item.UnitPrice.ToString("N2")</td>
+                                        <td>@item.UnitPrice.ToString("N2")₽</td>
                                         <td>@item.Quantity</td>
-                                        <td><strong>$@item.TotalPrice.ToString("N2")</strong></td>
+                                        <td><strong>@item.TotalPrice.ToString("N2")₽</strong></td>
                                     </tr>
                                 }
                             </tbody>
                             <tfoot>
                                 <tr>
                                     <td colspan="3" class="text-end"><strong>Сумма товаров:</strong></td>
-                                    <td><strong>$@Model.SubTotal.ToString("N2")</strong></td>
+                                    <td><strong>@Model.SubTotal.ToString("N2")₽</strong></td>
                                 </tr>
                                 <tr>
                                     <td colspan="3" class="text-end"><strong>Доставка:</strong></td>
-                                    <td><strong>$@Model.ShippingCost.ToString("N2")</strong></td>
+                                    <td><strong>@Model.ShippingCost.ToString("N2")₽</strong></td>
                                 </tr>
                                 @if (Model.DiscountAmount.HasValue && Model.DiscountAmount > 0)
                                 {
                                     <tr class="text-success">
                                         <td colspan="3" class="text-end"><strong>Скидка:</strong></td>
-                                        <td><strong>-$@Model.DiscountAmount.Value.ToString("N2")</strong></td>
+                                        <td><strong>-@Model.DiscountAmount.Value.ToString("N2")₽</strong></td>
                                     </tr>
                                 }
                                 <tr class="table-primary">
                                     <td colspan="3" class="text-end"><h5 class="mb-0">Итого:</h5></td>
-                                    <td><h5 class="mb-0 text-primary">$@Model.TotalAmount.ToString("N2")</h5></td>
+                                    <td><h5 class="mb-0 text-primary">@Model.TotalAmount.ToString("N2")₽</h5></td>
                                 </tr>
                             </tfoot>
                         </table>

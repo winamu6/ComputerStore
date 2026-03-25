@@ -28,7 +28,7 @@
                         <p class="mb-3">Детали заказа:</p>
                         <ul>
                             <li><strong>Номер заказа:</strong> @Model.Order.OrderNumber</li>
-                            <li><strong>Сумма к оплате:</strong> <strong class="text-success">$@Model.Order.TotalAmount.ToString("N2")</strong></li>
+                            <li><strong>Сумма к оплате:</strong> <strong class="text-success">@Model.Order.TotalAmount.ToString("N2")₽</strong></li>
                             <li><strong>Адрес доставки:</strong> @Model.Order.ShippingAddress, @Model.Order.ShippingCity</li>
                         </ul>
 
@@ -100,7 +100,7 @@
 
                             <div class="d-grid gap-2 mt-4">
                                 <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                                    <i class="bi bi-lock"></i> Оплатить $@Model.Order.TotalAmount.ToString("N2")
+                                    <i class="bi bi-lock"></i> Оплатить @Model.Order.TotalAmount.ToString("N2")₽
                                 </button>
                                 <a asp-controller="Orders" asp-action="Details" asp-route-id="@Model.Order.Id" 
                                    class="btn btn-outline-secondary">
@@ -136,18 +136,18 @@
                     
                     <div class="d-flex justify-content-between mb-2">
                         <span>Товары:</span>
-                        <strong>$@Model.Order.SubTotal.ToString("N2")</strong>
+                        <strong>@Model.Order.SubTotal.ToString("N2")₽</strong>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Доставка:</span>
-                        <strong>$@Model.Order.ShippingCost.ToString("N2")</strong>
+                        <strong>@Model.Order.ShippingCost.ToString("N2")₽</strong>
                     </div>
                     
                     @if (Model.Order.DiscountAmount.HasValue && Model.Order.DiscountAmount > 0)
                     {
                         <div class="d-flex justify-content-between mb-2 text-success">
                             <span>Скидка:</span>
-                            <strong>-$@Model.Order.DiscountAmount.Value.ToString("N2")</strong>
+                            <strong>-@Model.Order.DiscountAmount.Value.ToString("N2")₽</strong>
                         </div>
                     }
                     
@@ -155,7 +155,7 @@
                     
                     <div class="d-flex justify-content-between">
                         <h5>Итого:</h5>
-                        <h5 class="text-primary">$@Model.Order.TotalAmount.ToString("N2")</h5>
+                        <h5 class="text-primary">@Model.Order.TotalAmount.ToString("N2")₽</h5>
                     </div>
                     
                     <hr />

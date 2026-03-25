@@ -79,7 +79,7 @@
                                         <span class="badge bg-secondary">@order.ItemsCount шт.</span>
                                     </td>
                                     <td>
-                                        <strong>$@order.TotalAmount.ToString("N2")</strong>
+                                        <strong>@order.TotalAmount.ToString("N2")₽</strong>
                                     </td>
                                     <td>
                                         @switch (order.Status)

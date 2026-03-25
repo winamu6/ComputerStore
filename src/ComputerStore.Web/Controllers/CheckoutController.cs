@@ -60,7 +60,7 @@ namespace ComputerStore.Web.Controllers
                     ShippingAddress = customer?.Address ?? "",
                     ShippingCity = customer?.City ?? "",
                     ShippingPostalCode = customer?.PostalCode ?? "",
-                    ShippingCountry = customer?.Country ?? "США"
+                    ShippingCountry = customer?.Country ?? ""
                 }
             };
 

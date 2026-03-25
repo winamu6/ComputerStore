@@ -38,7 +38,7 @@
                                 <small class="text-muted">Количество: @item.Quantity</small>
                             </div>
                             <div class="text-end">
-                                <strong>$@item.Subtotal.ToString("N2")</strong>
+                                <strong>@item.Subtotal.ToString("N2")₽</strong>
                             </div>
                         </div>
                     }
@@ -137,7 +137,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
                         <span>Товары (@Model.Cart.TotalItems шт.):</span>
-                        <strong>$@Model.Cart.Subtotal.ToString("N2")</strong>
+                        <strong>@Model.Cart.Subtotal.ToString("N2")₽</strong>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Доставка:</span>
@@ -148,14 +148,14 @@
                             }
                             else
                             {
-                                <span>$@Model.Cart.ShippingCost.ToString("N2")</span>
+                                <span>@Model.Cart.ShippingCost.ToString("N2")₽</span>
                             }
                         </strong>
                     </div>
                     <hr />
                     <div class="d-flex justify-content-between mb-3">
                         <h5>Всего к оплате:</h5>
-                        <h5 class="text-primary">$@Model.Cart.TotalAmount.ToString("N2")</h5>
+                        <h5 class="text-primary">@Model.Cart.TotalAmount.ToString("N2")₽</h5>
                     </div>
 
                     @if (Model.Customer != null)

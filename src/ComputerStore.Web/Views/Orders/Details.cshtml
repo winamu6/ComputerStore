@@ -136,11 +136,11 @@
                             <div class="flex-grow-1">
                                 <h6 class="mb-1">@item.ProductName</h6>
                                 <small class="text-muted">
-                                    Цена: $@item.UnitPrice.ToString("N2") × @item.Quantity шт.
+                                    Цена: @item.UnitPrice.ToString("N2")₽ × @item.Quantity шт.
                                 </small>
                             </div>
                             <div class="text-end">
-                                <strong class="fs-5">$@item.TotalPrice.ToString("N2")</strong>
+                                <strong class="fs-5">@item.TotalPrice.ToString("N2")₽</strong>
                             </div>
                         </div>
                     }
@@ -148,23 +148,23 @@
                     <div class="mt-4">
                         <div class="d-flex justify-content-between mb-2">
                             <span>Сумма товаров:</span>
-                            <strong>$@Model.SubTotal.ToString("N2")</strong>
+                            <strong>@Model.SubTotal.ToString("N2")₽</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Доставка:</span>
-                            <strong>$@Model.ShippingCost.ToString("N2")</strong>
+                            <strong>@Model.ShippingCost.ToString("N2")₽</strong>
                         </div>
                         @if (Model.DiscountAmount.HasValue && Model.DiscountAmount > 0)
                         {
                             <div class="d-flex justify-content-between mb-2 text-success">
                                 <span>Скидка:</span>
-                                <strong>-$@Model.DiscountAmount.Value.ToString("N2")</strong>
+                                <strong>-@Model.DiscountAmount.Value.ToString("N2")₽</strong>
                             </div>
                         }
                         <hr />
                         <div class="d-flex justify-content-between">
                             <h5>Итого:</h5>
-                            <h5 class="text-primary">$@Model.TotalAmount.ToString("N2")</h5>
+                            <h5 class="text-primary">@Model.TotalAmount.ToString("N2")₽</h5>
                         </div>
                     </div>
                 </div>

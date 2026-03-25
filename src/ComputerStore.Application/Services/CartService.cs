@@ -44,28 +44,12 @@ namespace ComputerStore.Application.Services
                 return false;
 
             var existingItem = await _unitOfWork.CartItems.GetCartItemAsync(userId, dto.ProductId);
+            int currentQty = existingItem?.Quantity ?? 0;
 
-            if (existingItem != null)
-            {
-                existingItem.Quantity += dto.Quantity;
+            if (currentQty + dto.Quantity > product.StockQuantity)
+                return false;
 
-                if (existingItem.Quantity > product.StockQuantity)
-                    return false;
-
-                await _unitOfWork.CartItems.UpdateAsync(existingItem);
-            }
-            else
-            {
-                var cartItem = new CartItem
-                {
-                    UserId = userId,
-                    ProductId = dto.ProductId,
-                    Quantity = dto.Quantity,
-                    AddedDate = DateTime.UtcNow
-                };
-                await _unitOfWork.CartItems.AddAsync(cartItem);
-            }
-
+            await _unitOfWork.CartItems.AddOrUpdateAsync(userId, dto.ProductId, dto.Quantity);
             await _unitOfWork.SaveChangesAsync();
             return true;
         }

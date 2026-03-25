@@ -1,0 +1,333 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Вход";
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-page">
+    <!-- Left decorative panel -->
+    <div class="auth-panel d-none d-lg-flex">
+        <div class="auth-panel-content">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="auth-brand">
+                <i class="bi bi-pc-display-horizontal"></i>
+                <span>Компьютерный магазин</span>
+            </a>
+            <div class="auth-panel-text">
+                <h2>Рады вас видеть!</h2>
+                <p>Войдите в аккаунт, чтобы получить доступ к заказам, корзине и персональным предложениям.</p>
+            </div>
+            <div class="auth-panel-features">
+                <div class="auth-feature">
+                    <i class="bi bi-truck"></i>
+                    <span>Быстрая доставка</span>
+                </div>
+                <div class="auth-feature">
+                    <i class="bi bi-shield-check"></i>
+                    <span>Гарантия качества</span>
+                </div>
+                <div class="auth-feature">
+                    <i class="bi bi-headset"></i>
+                    <span>Поддержка 24/7</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right form panel -->
+    <div class="auth-form-side">
+        <div class="auth-form-wrapper">
+            <div class="auth-form-header">
+                <h1 class="auth-title">Вход в аккаунт</h1>
+                <p class="auth-subtitle">Нет аккаунта?
+                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="auth-link">Зарегистрироваться</a>
+                </p>
+            </div>
+
+            <form id="account" method="post" class="auth-form">
+                <div asp-validation-summary="ModelOnly" class="auth-alert alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span asp-validation-summary="ModelOnly"></span>
+                </div>
+
+                <div class="form-group-auth">
+                    <label asp-for="Input.Email" class="auth-label">
+                        <i class="bi bi-envelope me-1"></i>Email
+                    </label>
+                    <div class="input-wrapper">
+                        <input asp-for="Input.Email"
+                               class="form-control auth-input"
+                               autocomplete="username"
+                               placeholder="you@example.com" />
+                    </div>
+                    <span asp-validation-for="Input.Email" class="auth-validation"></span>
+                </div>
+
+                <div class="form-group-auth">
+                    <label asp-for="Input.Password" class="auth-label">
+                        <i class="bi bi-lock me-1"></i>Пароль
+                    </label>
+                    <div class="input-wrapper input-password-wrapper">
+                        <input asp-for="Input.Password"
+                               class="form-control auth-input"
+                               autocomplete="current-password"
+                               placeholder="Введите пароль"
+                               id="passwordField" />
+                        <button type="button" class="btn-toggle-password" onclick="togglePassword('passwordField', this)" tabindex="-1">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Input.Password" class="auth-validation"></span>
+                </div>
+
+                <div class="auth-row">
+                    <div class="form-check auth-check">
+                        <input asp-for="Input.RememberMe" class="form-check-input" id="rememberMe" />
+                        <label asp-for="Input.RememberMe" class="form-check-label">Запомнить меня</label>
+                    </div>
+                    <a asp-page="./ForgotPassword" class="auth-link-sm">Забыли пароль?</a>
+                </div>
+
+                <button type="submit" class="btn auth-submit-btn">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Войти
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        body { background: #f0f2f5; }
+
+        .auth-page {
+            min-height: calc(100vh - 120px);
+            display: flex;
+        }
+
+        /* ── Left decorative panel ── */
+        .auth-panel {
+            width: 420px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 40px;
+            color: #fff;
+        }
+
+        .auth-panel-content {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            width: 100%;
+        }
+
+        .auth-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .auth-brand i { font-size: 1.8rem; }
+
+        .auth-panel-text h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .auth-panel-text p {
+            font-size: 1rem;
+            opacity: 0.85;
+            line-height: 1.6;
+        }
+
+        .auth-panel-features {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .auth-feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .auth-feature i {
+            font-size: 1.3rem;
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ── Right form side ── */
+        .auth-form-side {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+        }
+
+        .auth-form-wrapper {
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .auth-form-header {
+            margin-bottom: 32px;
+        }
+
+        .auth-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        .auth-link {
+            color: #764ba2;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .auth-link:hover { text-decoration: underline; color: #667eea; }
+
+        /* ── Form elements ── */
+        .auth-form { display: flex; flex-direction: column; gap: 20px; }
+
+        .auth-alert {
+            border-radius: 10px;
+            font-size: 0.9rem;
+            padding: 10px 14px;
+        }
+
+        .form-group-auth { display: flex; flex-direction: column; gap: 6px; }
+
+        .auth-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .input-wrapper { position: relative; }
+
+        .auth-input {
+            height: 48px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 10px;
+            padding: 0 14px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fff;
+            width: 100%;
+        }
+
+        .auth-input:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.12);
+            outline: none;
+        }
+
+        .input-password-wrapper .auth-input { padding-right: 44px; }
+
+        .btn-toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 1rem;
+            transition: color 0.2s;
+        }
+
+        .btn-toggle-password:hover { color: #764ba2; }
+
+        .auth-validation {
+            font-size: 0.8rem;
+            color: #dc3545;
+        }
+
+        .auth-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .auth-check .form-check-input:checked {
+            background-color: #764ba2;
+            border-color: #764ba2;
+        }
+
+        .auth-check .form-check-label { font-size: 0.875rem; color: #374151; }
+
+        .auth-link-sm {
+            font-size: 0.875rem;
+            color: #764ba2;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-link-sm:hover { text-decoration: underline; }
+
+        .auth-submit-btn {
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+            margin-top: 4px;
+        }
+
+        .auth-submit-btn:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+            color: #fff;
+        }
+
+        .auth-submit-btn:active { transform: translateY(0); }
+    </style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePassword(fieldId, btn) {
+            const field = document.getElementById(fieldId);
+            const icon = btn.querySelector('i');
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                field.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+    </script>
+}

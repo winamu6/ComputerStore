@@ -58,12 +58,12 @@
                                     </td>
                                     <td>@product.CategoryName</td>
                                     <td>
-                                        <strong>$@product.Price.ToString("N2")</strong>
+                                        <strong>@product.Price.ToString("N2")₽</strong>
                                     </td>
                                     <td>
                                         @if (product.DiscountPrice.HasValue)
                                         {
-                                            <span class="text-success">$@product.DiscountPrice.Value.ToString("N2")</span>
+                                            <span class="text-success">@product.DiscountPrice.Value.ToString("N2")₽</span>
                                 
                                             <br />
                                             <span class="badge bg-danger">-@product.DiscountPercentage%</span>

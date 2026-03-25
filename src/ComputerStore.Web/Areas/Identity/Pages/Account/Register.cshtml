@@ -1,0 +1,417 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Регистрация";
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-page">
+    <!-- Left decorative panel -->
+    <div class="auth-panel d-none d-lg-flex">
+        <div class="auth-panel-content">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="auth-brand">
+                <i class="bi bi-pc-display-horizontal"></i>
+                <span>Компьютерный магазин</span>
+            </a>
+            <div class="auth-panel-text">
+                <h2>Присоединяйтесь к нам!</h2>
+                <p>Создайте аккаунт и получите доступ к эксклюзивным акциям, удобному отслеживанию заказов и персональным рекомендациям.</p>
+            </div>
+            <div class="auth-panel-benefits">
+                <div class="auth-benefit">
+                    <div class="auth-benefit-icon">
+                        <i class="bi bi-percent"></i>
+                    </div>
+                    <div>
+                        <div class="auth-benefit-title">Скидки для клиентов</div>
+                        <div class="auth-benefit-desc">Специальные предложения только для зарегистрированных пользователей</div>
+                    </div>
+                </div>
+                <div class="auth-benefit">
+                    <div class="auth-benefit-icon">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <div>
+                        <div class="auth-benefit-title">История заказов</div>
+                        <div class="auth-benefit-desc">Всегда знайте статус и детали ваших покупок</div>
+                    </div>
+                </div>
+                <div class="auth-benefit">
+                    <div class="auth-benefit-icon">
+                        <i class="bi bi-heart"></i>
+                    </div>
+                    <div>
+                        <div class="auth-benefit-title">Избранные товары</div>
+                        <div class="auth-benefit-desc">Сохраняйте понравившиеся позиции</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right form panel -->
+    <div class="auth-form-side">
+        <div class="auth-form-wrapper">
+            <div class="auth-form-header">
+                <h1 class="auth-title">Создать аккаунт</h1>
+                <p class="auth-subtitle">Уже есть аккаунт?
+                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="auth-link">Войти</a>
+                </p>
+            </div>
+
+            <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="auth-form">
+                <div asp-validation-summary="ModelOnly" class="auth-alert alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span asp-validation-summary="ModelOnly"></span>
+                </div>
+
+                <div class="form-group-auth">
+                    <label asp-for="Input.Email" class="auth-label">
+                        <i class="bi bi-envelope me-1"></i>Email
+                    </label>
+                    <div class="input-wrapper">
+                        <input asp-for="Input.Email"
+                               class="form-control auth-input"
+                               autocomplete="username"
+                               placeholder="you@example.com" />
+                    </div>
+                    <span asp-validation-for="Input.Email" class="auth-validation"></span>
+                </div>
+
+                <div class="form-group-auth">
+                    <label asp-for="Input.Password" class="auth-label">
+                        <i class="bi bi-lock me-1"></i>Пароль
+                    </label>
+                    <div class="input-wrapper input-password-wrapper">
+                        <input asp-for="Input.Password"
+                               class="form-control auth-input"
+                               autocomplete="new-password"
+                               placeholder="Минимум 6 символов"
+                               id="passwordField" />
+                        <button type="button" class="btn-toggle-password" onclick="togglePassword('passwordField', this)" tabindex="-1">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Input.Password" class="auth-validation"></span>
+                    <!-- Password strength bar -->
+                    <div class="password-strength mt-1" id="strengthBar" style="display:none">
+                        <div class="strength-track">
+                            <div class="strength-fill" id="strengthFill"></div>
+                        </div>
+                        <span class="strength-label" id="strengthLabel"></span>
+                    </div>
+                </div>
+
+                <div class="form-group-auth">
+                    <label asp-for="Input.ConfirmPassword" class="auth-label">
+                        <i class="bi bi-lock-fill me-1"></i>Подтверждение пароля
+                    </label>
+                    <div class="input-wrapper input-password-wrapper">
+                        <input asp-for="Input.ConfirmPassword"
+                               class="form-control auth-input"
+                               autocomplete="new-password"
+                               placeholder="Повторите пароль"
+                               id="confirmPasswordField" />
+                        <button type="button" class="btn-toggle-password" onclick="togglePassword('confirmPasswordField', this)" tabindex="-1">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Input.ConfirmPassword" class="auth-validation"></span>
+                </div>
+
+                <div class="auth-terms">
+                    <i class="bi bi-shield-check text-success me-1"></i>
+                    Регистрируясь, вы соглашаетесь с условиями использования сервиса.
+                </div>
+
+                <button type="submit" class="btn auth-submit-btn">
+                    <i class="bi bi-person-plus me-2"></i>Создать аккаунт
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        body { background: #f0f2f5; }
+
+        .auth-page {
+            min-height: calc(100vh - 120px);
+            display: flex;
+        }
+
+        /* ── Left panel ── */
+        .auth-panel {
+            width: 440px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 40px;
+            color: #fff;
+        }
+
+        .auth-panel-content {
+            display: flex;
+            flex-direction: column;
+            gap: 36px;
+            width: 100%;
+        }
+
+        .auth-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .auth-brand i { font-size: 1.8rem; }
+
+        .auth-panel-text h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .auth-panel-text p {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            line-height: 1.6;
+        }
+
+        .auth-panel-benefits {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .auth-benefit {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .auth-benefit-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+        }
+
+        .auth-benefit-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .auth-benefit-desc {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        /* ── Right form side ── */
+        .auth-form-side {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+        }
+
+        .auth-form-wrapper {
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .auth-form-header {
+            margin-bottom: 28px;
+        }
+
+        .auth-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        .auth-link {
+            color: #764ba2;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .auth-link:hover { text-decoration: underline; color: #667eea; }
+
+        /* ── Form elements ── */
+        .auth-form { display: flex; flex-direction: column; gap: 18px; }
+
+        .auth-alert {
+            border-radius: 10px;
+            font-size: 0.9rem;
+            padding: 10px 14px;
+        }
+
+        .form-group-auth { display: flex; flex-direction: column; gap: 6px; }
+
+        .auth-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .input-wrapper { position: relative; }
+
+        .auth-input {
+            height: 48px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 10px;
+            padding: 0 14px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fff;
+            width: 100%;
+        }
+
+        .auth-input:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.12);
+            outline: none;
+        }
+
+        .input-password-wrapper .auth-input { padding-right: 44px; }
+
+        .btn-toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 1rem;
+            transition: color 0.2s;
+        }
+
+        .btn-toggle-password:hover { color: #764ba2; }
+
+        .auth-validation {
+            font-size: 0.8rem;
+            color: #dc3545;
+        }
+
+        /* Password strength */
+        .password-strength { display: flex; align-items: center; gap: 8px; }
+
+        .strength-track {
+            flex: 1;
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease, background-color 0.3s ease;
+            width: 0%;
+        }
+
+        .strength-label { font-size: 0.75rem; font-weight: 600; min-width: 60px; }
+
+        .auth-terms {
+            font-size: 0.8rem;
+            color: #6c757d;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+
+        .auth-submit-btn {
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+
+        .auth-submit-btn:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+            color: #fff;
+        }
+
+        .auth-submit-btn:active { transform: translateY(0); }
+    </style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePassword(fieldId, btn) {
+            const field = document.getElementById(fieldId);
+            const icon = btn.querySelector('i');
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                field.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+
+        // Password strength meter
+        const pwField = document.getElementById('passwordField');
+        const strengthBar = document.getElementById('strengthBar');
+        const fill = document.getElementById('strengthFill');
+        const label = document.getElementById('strengthLabel');
+
+        pwField.addEventListener('input', function () {
+            const val = this.value;
+            if (!val) { strengthBar.style.display = 'none'; return; }
+            strengthBar.style.display = 'flex';
+
+            let score = 0;
+            if (val.length >= 6) score++;
+            if (val.length >= 10) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            const levels = [
+                { pct: '20%', color: '#dc3545', text: 'Слабый' },
+                { pct: '40%', color: '#fd7e14', text: 'Слабый' },
+                { pct: '60%', color: '#ffc107', text: 'Средний' },
+                { pct: '80%', color: '#20c997', text: 'Хороший' },
+                { pct: '100%', color: '#198754', text: 'Сильный' },
+            ];
+            const lvl = levels[Math.min(score - 1, 4)] || levels[0];
+            fill.style.width = lvl.pct;
+            fill.style.backgroundColor = lvl.color;
+            label.textContent = lvl.text;
+            label.style.color = lvl.color;
+        });
+    </script>
+}
