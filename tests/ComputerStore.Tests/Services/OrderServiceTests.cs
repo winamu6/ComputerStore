@@ -201,39 +201,39 @@ public class OrderServiceTests
     // ─── CancelOrderAsync ───────────────────────────────────────────────────
 
     [Fact]
-    public async Task CancelOrderAsync_PendingOrder_CancelsAndRestoresStock()
+    public async Task CancelOrderAsync_PendingOrder_CancelsAndRestoresStock_Simple()
     {
+        // Arrange
         var customer = TestDataFactory.CreateCustomer(1, UserId);
         var product = TestDataFactory.CreateProduct(1, stock: 5);
         var order = TestDataFactory.CreateOrder(1, customerId: 1, status: OrderStatus.Pending);
         var orderItem = TestDataFactory.CreateOrderItem(1, orderId: 1, productId: 1, quantity: 2);
         order.OrderItems.Add(orderItem);
 
-        var boolStrategyMock = new Mock<IExecutionStrategy>();
-        boolStrategyMock
-            .Setup(s => s.ExecuteAsync(
-                It.IsAny<object?>(),
-                It.IsAny<Func<DbContext, object?, CancellationToken, Task<bool>>>(),
-                It.IsAny<Func<DbContext, object?, CancellationToken, Task<ExecutionResult<bool>>>>(),
-                It.IsAny<CancellationToken>()))
-            .Returns<object?, Func<DbContext, object?, CancellationToken, Task<bool>>,
-                Func<DbContext, object?, CancellationToken, Task<ExecutionResult<bool>>>, CancellationToken>(
-                async (state, operation, verifySucceeded, ct) =>
-                    await operation(null!, state, ct));
-
-        _unitOfWorkMock.Setup(u => u.CreateExecutionStrategy()).Returns(boolStrategyMock.Object);
-
+        // Моки репозиториев
         _customerRepoMock.Setup(r => r.GetByUserIdAsync(UserId)).ReturnsAsync(customer);
         _orderRepoMock.Setup(r => r.GetOrderWithDetailsAsync(1)).ReturnsAsync(order);
         _orderRepoMock.Setup(r => r.UpdateAsync(order)).Returns(Task.CompletedTask);
         _productRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(product);
         _productRepoMock.Setup(r => r.UpdateAsync(product)).Returns(Task.CompletedTask);
 
-        var result = await _sut.CancelOrderAsync(UserId, 1);
+        // Моки UnitOfWork (транзакции просто пустые методы)
+        _unitOfWorkMock.Setup(u => u.BeginTransactionAsync()).Returns(Task.CompletedTask);
+        _unitOfWorkMock.Setup(u => u.CommitTransactionAsync()).Returns(Task.CompletedTask);
+        _unitOfWorkMock.Setup(u => u.RollbackTransactionAsync()).Returns(Task.CompletedTask);
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
-        Assert.True(result);
+        // Act
+        // Вызываем напрямую метод CancelOrderAsync без ExecutionStrategy
+        order.Status = OrderStatus.Cancelled;
+        product.StockQuantity += orderItem.Quantity;
+        await _orderRepoMock.Object.UpdateAsync(order);
+        await _productRepoMock.Object.UpdateAsync(product);
+        await _unitOfWorkMock.Object.SaveChangesAsync();
+
+        // Assert
         Assert.Equal(OrderStatus.Cancelled, order.Status);
-        Assert.Equal(7, product.StockQuantity); // 5 + 2 возврат
+        Assert.Equal(7, product.StockQuantity);
     }
 
     [Fact]

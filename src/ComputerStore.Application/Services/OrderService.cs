@@ -35,7 +35,17 @@ namespace ComputerStore.Application.Services
         public async Task<OrderDetailsDto?> GetOrderDetailsAsync(int orderId)
         {
             var order = await _unitOfWork.Orders.GetOrderWithDetailsAsync(orderId);
-            return order != null ? _mapper.Map<OrderDetailsDto>(order) : null;
+            if (order == null) return null;
+
+            var dto = _mapper.Map<OrderDetailsDto>(order);
+
+            foreach (var itemDto in dto.OrderItems)
+            {
+                itemDto.HasReview = await _unitOfWork.Reviews
+                    .HasCustomerReviewedProductAsync(order.CustomerId, itemDto.ProductId);
+            }
+
+            return dto;
         }
 
         public async Task<OrderDetailsDto?> GetOrderByNumberAsync(string orderNumber)

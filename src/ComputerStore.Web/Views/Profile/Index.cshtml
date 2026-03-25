@@ -1,18 +1,20 @@
-﻿@model ProfileViewModel
+﻿@using ComputerStore.Domain.Enums
+@model ComputerStore.Web.Models.ProfileViewModel
+
 @{
-    ViewData["Title"] = "Мой профиль";
+    ViewData["Title"] = "Личный кабинет";
 }
 
 <div class="container py-4">
-    <h2 class="mb-4">Мой профиль</h2>
+    <h2 class="mb-4">Личный кабинет</h2>
 
     <div class="row">
-        <!-- Profile Information -->
+        <!-- Информация о профиле -->
         <div class="col-lg-4 mb-4">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">
-                        <i class="bi bi-person-circle"></i> Информация
+                        <i class="bi bi-person-circle"></i> Мои данные
                     </h5>
                 </div>
                 <div class="card-body">
@@ -21,19 +23,15 @@
                         <h4 class="mt-2">@Model.Customer.FullName</h4>
                         <p class="text-muted">@User.Identity!.Name</p>
                     </div>
-
                     <hr />
-
                     <div class="mb-2">
                         <strong><i class="bi bi-person"></i> Имя:</strong><br />
                         @Model.Customer.FirstName
                     </div>
-
                     <div class="mb-2">
                         <strong><i class="bi bi-person"></i> Фамилия:</strong><br />
                         @Model.Customer.LastName
                     </div>
-
                     @if (!string.IsNullOrEmpty(Model.Customer.PhoneNumber))
                     {
                         <div class="mb-2">
@@ -41,7 +39,6 @@
                             @Model.Customer.PhoneNumber
                         </div>
                     }
-
                     @if (!string.IsNullOrEmpty(Model.Customer.Address))
                     {
                         <hr />
@@ -52,9 +49,7 @@
                             @Model.Customer.Country
                         </div>
                     }
-
                     <hr />
-
                     <div class="d-grid gap-2">
                         <a asp-action="Edit" class="btn btn-warning">
                             <i class="bi bi-pencil"></i> Редактировать профиль
@@ -64,16 +59,16 @@
             </div>
         </div>
 
-        <!-- Recent Orders and Stats -->
+        <!-- Статистика и заказы -->
         <div class="col-lg-8">
-            <!-- Statistics -->
+            <!-- Статистика -->
             <div class="row mb-4">
                 <div class="col-md-4 mb-3">
                     <div class="card shadow h-100">
                         <div class="card-body text-center">
                             <i class="bi bi-cart-check display-4 text-primary"></i>
                             <h3 class="mt-2">@Model.RecentOrders.Count()</h3>
-                            <p class="text-muted mb-0">Заказов</p>
+                            <p class="text-muted mb-0">Всего заказов</p>
                         </div>
                     </div>
                 </div>
@@ -81,24 +76,24 @@
                     <div class="card shadow h-100">
                         <div class="card-body text-center">
                             <i class="bi bi-clock-history display-4 text-warning"></i>
-                            <h3 class="mt-2">@Model.RecentOrders.Count(o => o.Status != ComputerStore.Domain.Enums.OrderStatus.Delivered && o.Status != ComputerStore.Domain.Enums.OrderStatus.Cancelled)</h3>
-                            <p class="text-muted mb-0">Активных</p>
+                            <h3 class="mt-2">@Model.RecentOrders.Count(o => o.Status != OrderStatus.Delivered && o.Status != OrderStatus.Cancelled)</h3>
+                            <p class="text-muted mb-0">Активных заказов</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4 mb-3">
                     <div class="card shadow h-100">
                         <div class="card-body text-center">
-                            <i class="bi bi-wallet2 display-4 text-success"></i>
-                            <h3 class="mt-2">@Model.RecentOrders.Sum(o => o.TotalAmount).ToString("N2")₽</h3>
-                            <p class="text-muted mb-0">Потрачено</p>
+                            <i class="bi bi-currency-dollar display-4 text-success"></i>
+                            <h3 class="mt-2">$@Model.RecentOrders.Sum(o => o.TotalAmount).ToString("N2")</h3>
+                            <p class="text-muted mb-0">Потрачено всего</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Recent Orders -->
-            <div class="card shadow">
+            <!-- Последние заказы -->
+            <div class="card shadow mb-4">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
                         <i class="bi bi-bag-check"></i> Последние заказы
@@ -118,7 +113,7 @@
                                         <th>Дата</th>
                                         <th>Статус</th>
                                         <th>Сумма</th>
-                                        <th>Действия</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -130,28 +125,28 @@
                                             <td>
                                                 @switch (order.Status)
                                                 {
-                                                    case ComputerStore.Domain.Enums.OrderStatus.Pending:
-                                                        <span class="badge bg-warning text-dark">@order.StatusDisplay</span>
+                                                    case OrderStatus.Pending:
+                                                        <span class="badge bg-warning text-dark">Ожидает</span>
                                                         break;
-                                                    case ComputerStore.Domain.Enums.OrderStatus.Processing:
-                                                        <span class="badge bg-info">@order.StatusDisplay</span>
+                                                    case OrderStatus.Processing:
+                                                        <span class="badge bg-info">В обработке</span>
                                                         break;
-                                                    case ComputerStore.Domain.Enums.OrderStatus.Shipped:
-                                                        <span class="badge bg-primary">@order.StatusDisplay</span>
+                                                    case OrderStatus.Shipped:
+                                                        <span class="badge bg-primary">Отправлен</span>
                                                         break;
-                                                    case ComputerStore.Domain.Enums.OrderStatus.Delivered:
-                                                        <span class="badge bg-success">@order.StatusDisplay</span>
+                                                    case OrderStatus.Delivered:
+                                                        <span class="badge bg-success">Доставлен</span>
                                                         break;
-                                                    case ComputerStore.Domain.Enums.OrderStatus.Cancelled:
-                                                        <span class="badge bg-danger">@order.StatusDisplay</span>
+                                                    case OrderStatus.Cancelled:
+                                                        <span class="badge bg-danger">Отменён</span>
                                                         break;
                                                 }
                                             </td>
-                                            <td><strong>@order.TotalAmount.ToString("N2")₽</strong></td>
+                                            <td><strong>$@order.TotalAmount.ToString("N2")</strong></td>
                                             <td>
                                                 <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id"
-                                                   class="btn btn-sm btn-outline-primary">
-                                                    <i class="bi bi-eye"></i> Детали
+                                                       class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i> Открыть
                                                 </a>
                                             </td>
                                         </tr>
@@ -164,7 +159,7 @@
                     {
                         <div class="text-center py-4">
                             <i class="bi bi-bag-x display-1 text-muted"></i>
-                            <p class="mt-3 text-muted">У вас пока нет заказов</p>
+                            <p class="mt-3 text-muted">У вас пока нет заказов.</p>
                             <a asp-controller="Products" asp-action="Index" class="btn btn-primary">
                                 Перейти в каталог
                             </a>
@@ -173,8 +168,8 @@
                 </div>
             </div>
 
-            <!-- Quick Actions -->
-            <div class="card shadow mt-4">
+            <!-- Быстрые действия -->
+            <div class="card shadow">
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="bi bi-lightning"></i> Быстрые действия
@@ -182,19 +177,24 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-4 mb-2">
+                        <div class="col-md-3 mb-2">
                             <a asp-controller="Orders" asp-action="Index" class="btn btn-outline-primary w-100">
-                                <i class="bi bi-list-ul"></i> Все заказы
+                                <i class="bi bi-list-ul"></i><br />Мои заказы
                             </a>
                         </div>
-                        <div class="col-md-4 mb-2">
+                        <div class="col-md-3 mb-2">
+                            <a asp-controller="Reviews" asp-action="MyReviews" class="btn btn-outline-warning w-100">
+                                <i class="bi bi-star-fill"></i><br />Мои отзывы
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
                             <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-success w-100">
-                                <i class="bi bi-cart"></i> Моя корзина
+                                <i class="bi bi-cart"></i><br />Корзина
                             </a>
                         </div>
-                        <div class="col-md-4 mb-2">
+                        <div class="col-md-3 mb-2">
                             <a asp-controller="Products" asp-action="Index" class="btn btn-outline-info w-100">
-                                <i class="bi bi-shop"></i> Каталог
+                                <i class="bi bi-shop"></i><br />Каталог
                             </a>
                         </div>
                     </div>

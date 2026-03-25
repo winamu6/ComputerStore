@@ -1,5 +1,6 @@
 ﻿@using ComputerStore.Domain.Enums
 @model ComputerStore.Shared.DTOs.OrderDetailsDto
+
 @{
     ViewData["Title"] = $"Заказ #{Model.OrderNumber}";
 }
@@ -14,8 +15,9 @@
 
     <div class="row">
         <div class="col-lg-8">
-            <!-- Payment Alert -->
-            @if (!Model.IsPaid && Model.Status != ComputerStore.Domain.Enums.OrderStatus.Cancelled)
+
+            <!-- Предупреждение об оплате -->
+            @if (!Model.IsPaid && Model.Status != OrderStatus.Cancelled)
             {
                 <div class="alert alert-warning shadow mb-4">
                     <div class="d-flex align-items-center justify-content-between">
@@ -23,12 +25,12 @@
                             <h5 class="mb-1">
                                 <i class="bi bi-exclamation-triangle-fill"></i> Заказ ожидает оплаты
                             </h5>
-                            <p class="mb-0">Пожалуйста, оплатите заказ для начала обработки</p>
+                            <p class="mb-0">Оплатите заказ, чтобы он был передан в обработку.</p>
                         </div>
                         <div>
                             <a asp-controller="Payment" asp-action="Index" asp-route-orderId="@Model.Id"
                                class="btn btn-warning btn-lg">
-                                <i class="bi bi-credit-card"></i> Оплатить сейчас
+                                <i class="bi bi-credit-card"></i> Оплатить
                             </a>
                         </div>
                     </div>
@@ -50,27 +52,27 @@
                 </div>
             }
 
-            <!-- Order Header -->
+            <!-- Заголовок заказа -->
             <div class="card shadow mb-4">
                 <div class="card-header bg-primary text-white">
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">Заказ #@Model.OrderNumber</h4>
                         @switch (Model.Status)
                         {
-                            case ComputerStore.Domain.Enums.OrderStatus.Pending:
-                                <span class="badge bg-warning text-dark fs-6">@Model.StatusDisplay</span>
+                            case OrderStatus.Pending:
+                                <span class="badge bg-warning text-dark fs-6">Ожидает обработки</span>
                                 break;
-                            case ComputerStore.Domain.Enums.OrderStatus.Processing:
-                                <span class="badge bg-info fs-6">@Model.StatusDisplay</span>
+                            case OrderStatus.Processing:
+                                <span class="badge bg-info fs-6">В обработке</span>
                                 break;
-                            case ComputerStore.Domain.Enums.OrderStatus.Shipped:
-                                <span class="badge bg-light text-dark fs-6">@Model.StatusDisplay</span>
+                            case OrderStatus.Shipped:
+                                <span class="badge bg-light text-dark fs-6">Отправлен</span>
                                 break;
-                            case ComputerStore.Domain.Enums.OrderStatus.Delivered:
-                                <span class="badge bg-success fs-6">@Model.StatusDisplay</span>
+                            case OrderStatus.Delivered:
+                                <span class="badge bg-success fs-6">Доставлен</span>
                                 break;
-                            case ComputerStore.Domain.Enums.OrderStatus.Cancelled:
-                                <span class="badge bg-danger fs-6">@Model.StatusDisplay</span>
+                            case OrderStatus.Cancelled:
+                                <span class="badge bg-danger fs-6">Отменён</span>
                                 break;
                         }
                     </div>
@@ -85,13 +87,13 @@
                             <strong>Способ оплаты:</strong><br />
                             @switch (Model.PaymentMethod)
                             {
-                                case ComputerStore.Domain.Enums.PaymentMethod.CreditCard:
+                                case PaymentMethod.CreditCard:
                                     <span><i class="bi bi-credit-card"></i> Кредитная карта</span>
                                     break;
-                                case ComputerStore.Domain.Enums.PaymentMethod.DebitCard:
+                                case PaymentMethod.DebitCard:
                                     <span><i class="bi bi-credit-card-2-front"></i> Дебетовая карта</span>
                                     break;
-                                case ComputerStore.Domain.Enums.PaymentMethod.Cash:
+                                case PaymentMethod.Cash:
                                     <span><i class="bi bi-cash"></i> Наличные при получении</span>
                                     break;
                                 default:
@@ -102,7 +104,7 @@
                         @if (!string.IsNullOrEmpty(Model.TrackingNumber))
                         {
                             <div class="col-md-12 mb-3">
-                                <strong>Трек-номер:</strong><br />
+                                <strong>Номер отслеживания:</strong><br />
                                 <code class="fs-6">@Model.TrackingNumber</code>
                             </div>
                         }
@@ -110,7 +112,7 @@
                 </div>
             </div>
 
-            <!-- Order Items -->
+            <!-- Состав заказа -->
             <div class="card shadow mb-4">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-box-seam"></i> Состав заказа</h5>
@@ -136,73 +138,99 @@
                             <div class="flex-grow-1">
                                 <h6 class="mb-1">@item.ProductName</h6>
                                 <small class="text-muted">
-                                    Цена: @item.UnitPrice.ToString("N2")₽ × @item.Quantity шт.
+                                    Цена: $@item.UnitPrice.ToString("N2") × @item.Quantity шт.
                                 </small>
                             </div>
                             <div class="text-end">
-                                <strong class="fs-5">@item.TotalPrice.ToString("N2")₽</strong>
+                                <strong class="fs-5">$@item.TotalPrice.ToString("N2")</strong>
                             </div>
                         </div>
                     }
 
                     <div class="mt-4">
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Сумма товаров:</span>
-                            <strong>@Model.SubTotal.ToString("N2")₽</strong>
+                            <span>Подытог:</span>
+                            <strong>$@Model.SubTotal.ToString("N2")</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Доставка:</span>
-                            <strong>@Model.ShippingCost.ToString("N2")₽</strong>
+                            <strong>$@Model.ShippingCost.ToString("N2")</strong>
                         </div>
                         @if (Model.DiscountAmount.HasValue && Model.DiscountAmount > 0)
                         {
                             <div class="d-flex justify-content-between mb-2 text-success">
                                 <span>Скидка:</span>
-                                <strong>-@Model.DiscountAmount.Value.ToString("N2")₽</strong>
+                                <strong>-$@Model.DiscountAmount.Value.ToString("N2")</strong>
                             </div>
                         }
                         <hr />
                         <div class="d-flex justify-content-between">
                             <h5>Итого:</h5>
-                            <h5 class="text-primary">@Model.TotalAmount.ToString("N2")₽</h5>
+                            <h5 class="text-primary">$@Model.TotalAmount.ToString("N2")</h5>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Блок отзывов — только для доставленных заказов -->
             @if (Model.Status == OrderStatus.Delivered)
             {
-                <div class="card">
-                    <div class="card-header bg-success">
-                        Оцените товары
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-star-fill"></i> Оцените товары из заказа
+                        </h5>
                     </div>
-                    @foreach (var item in Model.OrderItems)
-                    {
-                        <a asp-controller="Reviews" asp-action="Create"
-                           asp-route-productId="@item.ProductId"
-                           asp-route-orderId="@Model.Id">
-                            Оставить отзыв
-                        </a>
-                    }
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Поделитесь своим мнением о купленных товарах — это поможет другим покупателям.
+                        </p>
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                                <div class="d-flex align-items-center">
+                                    @if (!string.IsNullOrEmpty(item.ProductImageUrl))
+                                    {
+                                        <img src="@item.ProductImageUrl" alt="@item.ProductName"
+                                             style="width: 48px; height: 48px; object-fit: contain;"
+                                             class="me-3" />
+                                    }
+                                    <span class="fw-semibold">@item.ProductName</span>
+                                </div>
+                                <div>
+                                    @if (item.HasReview)
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="bi bi-check-circle"></i> Отзыв написан
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Reviews" asp-action="Create"
+                                           asp-route-productId="@item.ProductId"
+                                           asp-route-orderId="@Model.Id"
+                                           class="btn btn-outline-warning btn-sm">
+                                            <i class="bi bi-star"></i> Написать отзыв
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
                 </div>
             }
 
-            <!-- Shipping Information -->
+            <!-- Информация о доставке -->
             <div class="card shadow mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-truck"></i> Информация о доставке</h5>
+                    <h5 class="mb-0"><i class="bi bi-truck"></i> Адрес доставки</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <p class="mb-2">
-                                <strong>Адрес доставки:</strong><br />
-                                @Model.ShippingAddress<br />
-                                @Model.ShippingCity, @Model.ShippingPostalCode<br />
-                                @Model.ShippingCountry
-                            </p>
-                        </div>
-                    </div>
+                    <p class="mb-0">
+                        @Model.ShippingAddress<br />
+                        @Model.ShippingCity, @Model.ShippingPostalCode<br />
+                        @Model.ShippingCountry
+                    </p>
                 </div>
             </div>
 
@@ -210,7 +238,7 @@
             {
                 <div class="card shadow mb-4">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-chat-left-text"></i> Комментарий</h5>
+                        <h5 class="mb-0"><i class="bi bi-chat-left-text"></i> Примечание к заказу</h5>
                     </div>
                     <div class="card-body">
                         <p class="mb-0">@Model.Notes</p>
@@ -219,15 +247,14 @@
             }
         </div>
 
-        <!-- Sidebar -->
+        <!-- Боковая панель -->
         <div class="col-lg-4">
-            <!-- Actions -->
             <div class="card shadow mb-4">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-gear"></i> Действия</h5>
                 </div>
                 <div class="card-body">
-                    @if (!Model.IsPaid && Model.Status != ComputerStore.Domain.Enums.OrderStatus.Cancelled)
+                    @if (!Model.IsPaid && Model.Status != OrderStatus.Cancelled)
                     {
                         <div class="d-grid gap-2 mb-3">
                             <a asp-controller="Payment" asp-action="Index" asp-route-orderId="@Model.Id"
@@ -237,24 +264,20 @@
                         </div>
                         <hr />
                     }
-
                     <div class="d-grid gap-2">
-                        @if (Model.Status == ComputerStore.Domain.Enums.OrderStatus.Pending ||
-                                                Model.Status == ComputerStore.Domain.Enums.OrderStatus.Processing)
+                        @if (Model.Status == OrderStatus.Pending || Model.Status == OrderStatus.Processing)
                         {
                             <form asp-action="Cancel" asp-route-id="@Model.Id" method="post"
-                                  onsubmit="return confirm('Вы уверены, что хотите отменить этот заказ?');">
+                                  onsubmit="return confirm('Вы уверены, что хотите отменить заказ?');">
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="btn btn-danger w-100">
                                     <i class="bi bi-x-circle"></i> Отменить заказ
                                 </button>
                             </form>
                         }
-
                         <a asp-action="Index" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left"></i> К списку заказов
                         </a>
-
                         <a asp-controller="Products" asp-action="Index" class="btn btn-outline-success">
                             <i class="bi bi-shop"></i> Продолжить покупки
                         </a>
@@ -262,21 +285,20 @@
                 </div>
             </div>
 
-            <!-- Order Timeline -->
+            <!-- Хронология заказа -->
             <div class="card shadow">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> История заказа</h5>
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> История статусов</h5>
                 </div>
                 <div class="card-body">
                     <div class="timeline">
-                        <div class="timeline-item @(Model.Status >= ComputerStore.Domain.Enums.OrderStatus.Pending ? "completed" : "")">
+                        <div class="timeline-item @(Model.Status >= OrderStatus.Pending ? "completed" : "")">
                             <div class="timeline-marker"></div>
                             <div class="timeline-content">
-                                <strong>Заказ создан</strong><br />
+                                <strong>Заказ оформлен</strong><br />
                                 <small class="text-muted">@Model.OrderDate.ToString("dd.MM.yyyy HH:mm")</small>
                             </div>
                         </div>
-
                         @if (Model.IsPaid)
                         {
                             <div class="timeline-item completed">
@@ -290,32 +312,24 @@
                                 </div>
                             </div>
                         }
-
-                        <div class="timeline-item @(Model.Status >= ComputerStore.Domain.Enums.OrderStatus.Processing ? "completed" : "")">
+                        <div class="timeline-item @(Model.Status >= OrderStatus.Processing ? "completed" : "")">
                             <div class="timeline-marker"></div>
-                            <div class="timeline-content">
-                                <strong>В обработке</strong>
-                            </div>
+                            <div class="timeline-content"><strong>В обработке</strong></div>
                         </div>
-
-                        <div class="timeline-item @(Model.Status >= ComputerStore.Domain.Enums.OrderStatus.Shipped ? "completed" : "")">
+                        <div class="timeline-item @(Model.Status >= OrderStatus.Shipped ? "completed" : "")">
                             <div class="timeline-marker"></div>
                             <div class="timeline-content">
                                 <strong>Отправлен</strong>
                                 @if (!string.IsNullOrEmpty(Model.TrackingNumber))
                                 {
                                     <br />
-                                
                                     <small class="text-muted">@Model.TrackingNumber</small>
                                 }
                             </div>
                         </div>
-
-                        <div class="timeline-item @(Model.Status == ComputerStore.Domain.Enums.OrderStatus.Delivered ? "completed" : "")">
+                        <div class="timeline-item @(Model.Status == OrderStatus.Delivered ? "completed" : "")">
                             <div class="timeline-marker"></div>
-                            <div class="timeline-content">
-                                <strong>Доставлен</strong>
-                            </div>
+                            <div class="timeline-content"><strong>Доставлен</strong></div>
                         </div>
                     </div>
                 </div>
@@ -325,45 +339,11 @@
 </div>
 
 <style>
-    .timeline {
-        position: relative;
-        padding-left: 30px;
-    }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 8px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: #dee2e6;
-        }
-
-    .timeline-item {
-        position: relative;
-        margin-bottom: 20px;
-    }
-
-        .timeline-item:last-child {
-            margin-bottom: 0;
-        }
-
-    .timeline-marker {
-        position: absolute;
-        left: -26px;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: #dee2e6;
-        border: 3px solid #fff;
-    }
-
-    .timeline-item.completed .timeline-marker {
-        background: #198754;
-    }
-
-    .timeline-item.completed .timeline-content strong {
-        color: #198754;
-    }
+    .timeline { position: relative; padding-left: 30px; }
+    .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #dee2e6; }
+    .timeline-item { position: relative; margin-bottom: 20px; }
+    .timeline-item:last-child { margin-bottom: 0; }
+    .timeline-marker { position: absolute; left: -26px; width: 16px; height: 16px; border-radius: 50%; background: #dee2e6; border: 3px solid #fff; }
+    .timeline-item.completed .timeline-marker { background: #198754; }
+    .timeline-item.completed .timeline-content strong { color: #198754; }
 </style>

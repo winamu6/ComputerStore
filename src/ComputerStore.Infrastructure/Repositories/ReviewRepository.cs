@@ -72,7 +72,7 @@ namespace ComputerStore.Infrastructure.Repositories
                     AverageRating = g.Average(r => r.Rating),
                     ReviewCount = g.Count()
                 })
-                .Where(x => x.ReviewCount >= 3)
+                .Where(x => x.ReviewCount >= 1)
                 .OrderByDescending(x => x.AverageRating)
                 .ThenByDescending(x => x.ReviewCount)
                 .Take(count)

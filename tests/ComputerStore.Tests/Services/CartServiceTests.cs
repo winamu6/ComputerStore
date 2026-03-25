@@ -114,13 +114,13 @@ public class CartServiceTests
 
         _productRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(product);
         _cartRepoMock.Setup(r => r.GetCartItemAsync(UserId, 1)).ReturnsAsync((CartItem?)null);
-        _cartRepoMock.Setup(r => r.AddAsync(It.IsAny<CartItem>())).ReturnsAsync(new ComputerStore.Domain.Entities.CartItem());
+        _cartRepoMock.Setup(r => r.AddOrUpdateAsync(UserId, 1, dto.Quantity)).Returns(Task.CompletedTask);
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
         var result = await _sut.AddToCartAsync(UserId, dto);
 
         Assert.True(result);
-        _cartRepoMock.Verify(r => r.AddAsync(It.IsAny<CartItem>()), Times.Once);
+        _cartRepoMock.Verify(r => r.AddOrUpdateAsync(UserId, 1, dto.Quantity), Times.Once);
     }
 
     [Fact]
@@ -132,14 +132,13 @@ public class CartServiceTests
 
         _productRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(product);
         _cartRepoMock.Setup(r => r.GetCartItemAsync(UserId, 1)).ReturnsAsync(existingItem);
-        _cartRepoMock.Setup(r => r.UpdateAsync(existingItem)).Returns(Task.CompletedTask);
+        _cartRepoMock.Setup(r => r.AddOrUpdateAsync(UserId, 1, dto.Quantity)).Returns(Task.CompletedTask);
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
         var result = await _sut.AddToCartAsync(UserId, dto);
 
         Assert.True(result);
-        Assert.Equal(5, existingItem.Quantity); // 2 + 3
-        _cartRepoMock.Verify(r => r.UpdateAsync(existingItem), Times.Once);
+        _cartRepoMock.Verify(r => r.AddOrUpdateAsync(UserId, 1, dto.Quantity), Times.Once);
     }
 
     [Fact]

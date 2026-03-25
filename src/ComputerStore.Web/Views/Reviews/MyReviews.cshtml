@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<ComputerStore.Shared.DTOs.ReviewDto>
+
 @{
     ViewData["Title"] = "Мои отзывы";
 }
@@ -7,6 +8,21 @@
     <h2 class="mb-4">
         <i class="bi bi-star-fill text-warning"></i> Мои отзывы
     </h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
     @if (Model.Any())
     {
@@ -18,15 +34,15 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-8">
-                                    <!-- Product Name -->
+                                    <!-- Название товара -->
                                     <h5 class="mb-2">
                                         <a asp-controller="Products" asp-action="Details" asp-route-id="@review.ProductId"
-                                           class="text-decoration-none">
+                                               class="text-decoration-none">
                                             @review.ProductName
                                         </a>
                                     </h5>
 
-                                    <!-- Rating -->
+                                    <!-- Рейтинг -->
                                     <div class="mb-2">
                                         @for (int i = 1; i <= 5; i++)
                                         {
@@ -47,22 +63,22 @@
                                         }
                                     </div>
 
-                                    <!-- Title -->
+                                    <!-- Заголовок -->
                                     <h6 class="mb-2">@review.Title</h6>
 
-                                    <!-- Comment -->
+                                    <!-- Текст -->
                                     <p class="text-muted mb-2">@review.Comment</p>
 
-                                    <!-- Date -->
+                                    <!-- Дата -->
                                     <small class="text-muted">
-                                        Опубликовано: @review.CreatedAt.ToString("dd MMMM yyyy")
+                                        Написан: @review.CreatedAt.ToString("dd MMMM yyyy")
                                         @if (review.UpdatedAt.HasValue)
                                         {
-                                            <span class="ms-2">(изменено: @review.UpdatedAt.Value.ToString("dd MMMM yyyy"))</span>
+                                            <span class="ms-2">(Изменён: @review.UpdatedAt.Value.ToString("dd MMMM yyyy"))</span>
                                         }
                                     </small>
 
-                                    <!-- Helpful Count -->
+                                    <!-- Полезность -->
                                     @if (review.HelpfulCount > 0 || review.NotHelpfulCount > 0)
                                     {
                                         <div class="mt-2">
@@ -79,15 +95,15 @@
                                 <div class="col-md-4 text-end">
                                     <div class="d-grid gap-2">
                                         <a asp-action="Edit" asp-route-id="@review.Id"
-                                           class="btn btn-warning btn-sm">
+                                               class="btn btn-warning btn-sm">
                                             <i class="bi bi-pencil-fill"></i> Редактировать
                                         </a>
                                         <a asp-controller="Products" asp-action="Details" asp-route-id="@review.ProductId"
-                                           class="btn btn-info btn-sm">
+                                               class="btn btn-info btn-sm">
                                             <i class="bi bi-eye-fill"></i> Посмотреть товар
                                         </a>
                                         <form asp-action="Delete" asp-route-id="@review.Id" method="post"
-                                              onsubmit="return confirm('Вы уверены, что хотите удалить этот отзыв?');">
+                                              onsubmit="return confirm('Удалить отзыв? Это действие нельзя отменить.');">
                                             @Html.AntiForgeryToken()
                                             <button type="submit" class="btn btn-danger btn-sm w-100">
                                                 <i class="bi bi-trash-fill"></i> Удалить
@@ -107,12 +123,12 @@
         <div class="text-center py-5">
             <i class="bi bi-inbox display-1 text-muted"></i>
             <h4 class="mt-3 text-muted">У вас пока нет отзывов</h4>
-            <p class="text-muted">Оставьте отзыв о купленном товаре</p>
-            <a asp-controller="Orders" asp-action="Index" class="btn btn-primary">
+            <p class="text-muted">После получения заказа вы сможете оставить отзыв на купленные товары.</p>
+            <a asp-controller="Orders" asp-action="Index" class="btn btn-primary me-2">
                 <i class="bi bi-bag-check"></i> Мои заказы
             </a>
             <a asp-controller="Products" asp-action="Index" class="btn btn-outline-success">
-                <i class="bi bi-shop"></i> Перейти в каталог
+                <i class="bi bi-shop"></i> В каталог
             </a>
         </div>
     }

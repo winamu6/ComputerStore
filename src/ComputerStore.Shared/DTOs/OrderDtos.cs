@@ -61,6 +61,7 @@ namespace ComputerStore.Shared.DTOs
         public decimal UnitPrice { get; set; }
         public int Quantity { get; set; }
         public decimal TotalPrice { get; set; }
+        public bool HasReview { get; set; }
     }
 
     public class CreateOrderDto
@@ -81,5 +82,4 @@ namespace ComputerStore.Shared.DTOs
         public OrderStatus Status { get; set; }
         public string? TrackingNumber { get; set; }
     }
-
 }

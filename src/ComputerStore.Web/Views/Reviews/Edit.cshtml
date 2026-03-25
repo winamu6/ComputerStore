@@ -1,4 +1,5 @@
 ﻿@model ComputerStore.Web.Models.EditReviewViewModel
+
 @{
     ViewData["Title"] = "Редактировать отзыв";
 }
@@ -13,7 +14,8 @@
                     </h4>
                 </div>
                 <div class="card-body">
-                    <!-- Product Info -->
+
+                    <!-- Информация о товаре -->
                     <div class="mb-4 pb-4 border-bottom">
                         <h5 class="mb-0">@Model.ProductName</h5>
                     </div>
@@ -23,70 +25,65 @@
                         <input type="hidden" asp-for="Id" />
                         <input type="hidden" asp-for="ProductId" />
 
-                        <!-- Rating -->
+                        <!-- Рейтинг -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Оценка*</label>
+                            <label class="form-label fw-bold">Оценка *</label>
                             <div class="star-rating-input">
                                 <div class="stars" id="star-rating">
-                                    <input type="radio" name="Rating" value="5" id="star5" 
+                                    <input type="radio" name="Rating" value="5" id="star5"
                                            @(Model.Rating == 5 ? "checked" : "") required />
-                                    <label for="star5" title="5 звёзд">★</label>
-                                    
+                                    <label for="star5" title="5 звёзд">&#9733;</label>
                                     <input type="radio" name="Rating" value="4" id="star4"
                                            @(Model.Rating == 4 ? "checked" : "") />
-                                    <label for="star4" title="4 звезды">★</label>
-                                    
+                                    <label for="star4" title="4 звезды">&#9733;</label>
                                     <input type="radio" name="Rating" value="3" id="star3"
                                            @(Model.Rating == 3 ? "checked" : "") />
-                                    <label for="star3" title="3 звезды">★</label>
-                                    
+                                    <label for="star3" title="3 звезды">&#9733;</label>
                                     <input type="radio" name="Rating" value="2" id="star2"
                                            @(Model.Rating == 2 ? "checked" : "") />
-                                    <label for="star2" title="2 звезды">★</label>
-                                    
+                                    <label for="star2" title="2 звезды">&#9733;</label>
                                     <input type="radio" name="Rating" value="1" id="star1"
                                            @(Model.Rating == 1 ? "checked" : "") />
-                                    <label for="star1" title="1 звезда">★</label>
+                                    <label for="star1" title="1 звезда">&#9733;</label>
                                 </div>
                                 <div class="rating-text mt-2" id="rating-text">
                                     @{
-                                        var ratingText = Model.Rating switch
-                                        {
-                                            5 => "<strong class='text-warning'>★★★★★</strong> Отлично!",
-                                            4 => "<strong class='text-warning'>★★★★☆</strong> Хорошо",
-                                            3 => "<strong class='text-warning'>★★★☆☆</strong> Нормально",
-                                            2 => "<strong class='text-warning'>★★☆☆☆</strong> Плохо",
-                                            1 => "<strong class='text-warning'>★☆☆☆☆</strong> Ужасно",
-                                            _ => "<small class='text-muted'>Выберите оценку</small>"
+                                        var ratingLabel = Model.Rating switch {
+                                            5 => "Отлично",
+                                            4 => "Хорошо",
+                                            3 => "Нормально",
+                                            2 => "Плохо",
+                                            1 => "Ужасно",
+                                            _ => "Выберите оценку"
                                         };
                                     }
-                                    @Html.Raw(ratingText)
+                                    <small class="text-warning fw-bold">@ratingLabel</small>
                                 </div>
                             </div>
                             <span asp-validation-for="Rating" class="text-danger"></span>
                         </div>
 
-                        <!-- Title -->
+                        <!-- Заголовок -->
                         <div class="mb-3">
-                            <label asp-for="Title" class="form-label fw-bold">Заголовок отзыва*</label>
-                            <input asp-for="Title" class="form-control" 
-                                   placeholder="Например: Отличный товар!" 
+                            <label asp-for="Title" class="form-label fw-bold">Заголовок отзыва *</label>
+                            <input asp-for="Title" class="form-control"
+                                   placeholder="Кратко опишите впечатление от товара"
                                    maxlength="200" required />
                             <span asp-validation-for="Title" class="text-danger"></span>
-                            <small class="text-muted">Максимум 200 символов</small>
+                            <small class="text-muted">Осталось символов: @(200 - Model.Title.Length)</small>
                         </div>
 
-                        <!-- Comment -->
+                        <!-- Текст отзыва -->
                         <div class="mb-4">
-                            <label asp-for="Comment" class="form-label fw-bold">Ваш отзыв*</label>
-                            <textarea asp-for="Comment" class="form-control" rows="6" 
-                                      placeholder="Расскажите о своём опыте использования товара..." 
+                            <label asp-for="Comment" class="form-label fw-bold">Текст отзыва *</label>
+                            <textarea asp-for="Comment" class="form-control" rows="6"
+                                      placeholder="Расскажите подробнее о товаре..."
                                       maxlength="2000" required></textarea>
                             <span asp-validation-for="Comment" class="text-danger"></span>
-                            <small class="text-muted">Максимум 2000 символов</small>
+                            <small class="text-muted">Осталось символов: @(2000 - Model.Comment.Length)</small>
                         </div>
 
-                        <!-- Submit -->
+                        <!-- Кнопки -->
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-warning btn-lg">
                                 <i class="bi bi-save-fill"></i> Сохранить изменения
@@ -103,87 +100,50 @@
 </div>
 
 <style>
-    .star-rating-input {
-        text-align: center;
-    }
-
-    .stars {
-        display: inline-flex;
-        flex-direction: row-reverse;
-        justify-content: center;
-    }
-
-    .stars input[type="radio"] {
-        display: none;
-    }
-
-    .stars label {
-        font-size: 3rem;
-        color: #ddd;
-        cursor: pointer;
-        transition: color 0.2s;
-        margin: 0 5px;
-    }
-
+    .star-rating-input { text-align: center; }
+    .stars { display: inline-flex; flex-direction: row-reverse; justify-content: center; }
+    .stars input[type="radio"] { display: none; }
+    .stars label { font-size: 3rem; color: #ddd; cursor: pointer; transition: color 0.2s; margin: 0 5px; }
     .stars input[type="radio"]:checked ~ label,
     .stars label:hover,
-    .stars label:hover ~ label {
-        color: #ffc107;
-    }
-
-    .stars input[type="radio"]:checked + label:hover,
-    .stars input[type="radio"]:checked + label:hover ~ label,
-    .stars input[type="radio"]:checked ~ label:hover,
-    .stars input[type="radio"]:checked ~ label:hover ~ label,
-    .stars label:hover ~ input[type="radio"]:checked ~ label {
-        color: #ffc107;
-    }
+    .stars label:hover ~ label { color: #ffc107; }
 </style>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    
     <script>
-        // Обновление текста под звёздами
         const ratingInputs = document.querySelectorAll('input[name="Rating"]');
         const ratingText = document.getElementById('rating-text');
-        
         const ratingTexts = {
-            5: '<strong class="text-warning">★★★★★</strong> Отлично!',
-            4: '<strong class="text-warning">★★★★☆</strong> Хорошо',
-            3: '<strong class="text-warning">★★★☆☆</strong> Нормально',
-            2: '<strong class="text-warning">★★☆☆☆</strong> Плохо',
-            1: '<strong class="text-warning">★☆☆☆☆</strong> Ужасно'
+            5: '<strong class="text-warning">Отлично</strong>',
+            4: '<strong class="text-warning">Хорошо</strong>',
+            3: '<strong class="text-warning">Нормально</strong>',
+            2: '<strong class="text-warning">Плохо</strong>',
+            1: '<strong class="text-warning">Ужасно</strong>'
         };
-        
         ratingInputs.forEach(input => {
-            input.addEventListener('change', function() {
+            input.addEventListener('change', function () {
                 ratingText.innerHTML = ratingTexts[this.value];
             });
         });
-        
-        // Подсчёт символов
+
         const titleInput = document.querySelector('input[name="Title"]');
         const commentInput = document.querySelector('textarea[name="Comment"]');
-        
         if (titleInput) {
-            const updateTitleCount = () => {
+            const updateTitle = () => {
                 const remaining = 200 - titleInput.value.length;
-                const small = titleInput.nextElementSibling.nextElementSibling;
-                small.textContent = `Осталось ${remaining} символов`;
+                titleInput.nextElementSibling.nextElementSibling.textContent = `Осталось символов: ${remaining}`;
             };
-            titleInput.addEventListener('input', updateTitleCount);
-            updateTitleCount();
+            titleInput.addEventListener('input', updateTitle);
+            updateTitle();
         }
-        
         if (commentInput) {
-            const updateCommentCount = () => {
+            const updateComment = () => {
                 const remaining = 2000 - commentInput.value.length;
-                const small = commentInput.nextElementSibling.nextElementSibling;
-                small.textContent = `Осталось ${remaining} символов`;
+                commentInput.nextElementSibling.nextElementSibling.textContent = `Осталось символов: ${remaining}`;
             };
-            commentInput.addEventListener('input', updateCommentCount);
-            updateCommentCount();
+            commentInput.addEventListener('input', updateComment);
+            updateComment();
         }
     </script>
 }
